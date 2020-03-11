@@ -14,6 +14,7 @@ PeerAssets tracking and creation.
 # Requirements
 ```
 go get github.com/saeveritt/go-peercoind
+go get github.com/golang/protobuf/proto
 go get github.com/boltdb/bolt
 ```
 # Configure
