@@ -1,4 +1,10 @@
 # go-peerassets!
+#Requirements
+```
+go get github.com/saeveritt/go-peercoind
+go get github.com/boltdb/bolt
+```
+
 # Language
 **deckID** = *Deck (asset) spawning transaction ID*\
 **Address** = Relevant address to be queried\
