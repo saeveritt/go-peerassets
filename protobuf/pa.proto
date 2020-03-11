@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+// PeerAssets transaction data specification
+// written by hrobeers (github.com/hrobeers)
+
+// Meta-data message for the deck spawn transaction
+message DeckSpawn {
+// Protocol version number
+uint32 version = 1;
+
+// Name for the registered asset
+string name = 2;
+
+// Number of decimals to define how much an asset can divided
+uint32 number_of_decimals = 3;
+
+// Modes for asset issuance
+enum MODE {
+NONE   = 0x00; // No issuance allowed
+CUSTOM = 0x01; // Not specified, custom client implementation needed
+ONCE   = 0x02; // Only one issuance transaction from asset owner allowed
+MULTI  = 0x04; // Multiple issuance transactions from asset owner allowed
+MONO   = 0x08; // All card transaction amounts are equal to 1
+UNFLUSHABLE  = 0x10; // No card transfer transactions allowed except for the card-issue transaction
+// 0x20 used by SUBSCRIPTION (0x34 = 0x20 | 0x04 | 0x10)
+SUBSCRIPTION = 0x34; // An address is subscribed to a service for X hours since the first received cards.
+// Where X is the asset balance of the address.
+// This mode automatically enables MULTI & UNFLUSHABLE (0x34 = 0x20 | 0x04 | 0x10)
+// SINGLET is a combination of ONCE and MONO (0x02 | 0x08)
+SINGLET = 0x0a; // Singlet deck, one MONO card issunce allowed. (ONCE | MONO)
+}
+uint32 issue_mode = 4;
+
+// Free form asset specific data (optional)
+bytes asset_specific_data = 5;
+
+// card transaction fee (optional)
+// token amount to be burned upon each card transfer
+// to be encoded as: fee * 10**number_of_decimals
+// defaults to zero
+uint32 fee = 6;
+}
+
+// Transaction data for:
+// - Card transfer transaction
+// - Card issue transaction
+// - Card burn transaction
+message CardTransfer {
+// Protocol version number
+uint32 version = 1;
+
+// Amount to transfer
+repeated uint64 amount = 2;
+
+// Number of decimals
+// Should be equal to the number specified in the deck spawn transaction.
+// Encoded in this message for easy validation
+uint32 number_of_decimals = 3;
+
+// Free form asset specific data (optional)
+bytes asset_specific_data = 4;
+}
