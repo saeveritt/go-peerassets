@@ -1,5 +1,5 @@
 # go-peerassets!
-#Requirements
+# Requirements
 ```
 go get github.com/saeveritt/go-peercoind
 go get github.com/boltdb/bolt
