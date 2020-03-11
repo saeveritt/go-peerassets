@@ -2,7 +2,7 @@ package utils
 
 import (
 	"log"
-	"go-peerassets/networks"
+	"github.com/saeveritt/go-peerassets/networks"
 	"encoding/hex"
 	"crypto/sha256"
 )

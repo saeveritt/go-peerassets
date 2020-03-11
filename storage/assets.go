@@ -1,7 +1,7 @@
 package storage
 
 import (
-	"go-peerassets/utils"
+	"github.com/saeveritt/go-peerassets/utils"
 )
 
 func PutRootAsset(){

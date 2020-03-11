@@ -2,7 +2,7 @@ package rpc
 
 import (
 	ppcd "github.com/saeveritt/go-peercoind"
-	"go-peerassets/networks"
+	"github.com/saeveritt/go-peerassets/networks"
 
 	"log"
 )

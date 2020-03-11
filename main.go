@@ -1,8 +1,8 @@
 package main
 
 import (
-	"go-peerassets/utils"
-	"go-peerassets/storage"
+	"github.com/saeveritt/go-peerassets/utils"
+	"github.com/saeveritt/go-peerassets/storage"
 )
 
 func init(){

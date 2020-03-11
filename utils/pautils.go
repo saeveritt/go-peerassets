@@ -3,9 +3,9 @@ package utils
 import (
 	ppcd "github.com/saeveritt/go-peercoind"
 	"log"
-	"go-peerassets/protobuf"
-	"go-peerassets/rpc"
-	"go-peerassets/networks"
+	"github.com/saeveritt/go-peerassets/protobuf"
+	"github.com/saeveritt/go-peerassets/rpc"
+	"github.com/saeveritt/go-peerassets/networks"
 	"strings"
 	"encoding/hex"
 )
