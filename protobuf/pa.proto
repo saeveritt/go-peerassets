@@ -6,13 +6,13 @@ syntax = "proto3";
 // Meta-data message for the deck spawn transaction
 message DeckSpawn {
 // Protocol version number
-uint32 version = 1;
+int32 version = 1;
 
 // Name for the registered asset
 string name = 2;
 
 // Number of decimals to define how much an asset can divided
-uint32 number_of_decimals = 3;
+int32 number_of_decimals = 3;
 
 // Modes for asset issuance
 enum MODE {
@@ -29,7 +29,7 @@ SUBSCRIPTION = 0x34; // An address is subscribed to a service for X hours since 
 // SINGLET is a combination of ONCE and MONO (0x02 | 0x08)
 SINGLET = 0x0a; // Singlet deck, one MONO card issunce allowed. (ONCE | MONO)
 }
-uint32 issue_mode = 4;
+int32 issue_mode = 4;
 
 // Free form asset specific data (optional)
 bytes asset_specific_data = 5;
