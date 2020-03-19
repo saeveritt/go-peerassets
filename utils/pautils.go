@@ -1,11 +1,15 @@
 package utils
 
 import (
+	"encoding/binary"
+	"errors"
+	"github.com/saeveritt/go-peerassets/storage"
 	ppcd "github.com/saeveritt/go-peercoind"
 	"log"
 	"github.com/saeveritt/go-peerassets/protobuf"
 	"github.com/saeveritt/go-peerassets/rpc"
 	"github.com/saeveritt/go-peerassets/networks"
+	"strconv"
 	"strings"
 	"encoding/hex"
 )
@@ -13,7 +17,7 @@ var cli *ppcd.Bitcoind
 var net *networks.NetParameters
 
 func init(){
-	cli, net = rpc.Connect(networks.Default())
+	cli, net = rpc.Connect(networks.Default().Name)
 }
 
 func must(err error){
@@ -26,6 +30,7 @@ func ImportRootP2TH() {
 	resp, err := cli.ValidateAddress(net.Address)
 	must(err)
 	if resp.IsMine{return}
+	// This will load the P2TH Main Registry with Account Name set to <Address>
 	must(cli.ImportPrivKey(net.WIF,net.Address,true))
 }
 
@@ -33,10 +38,22 @@ func ImportDeck(txid string){
 	_, err := cli.GetAddressesByAccount(txid)
 	must(err)
 	wif := ToWIF(txid)
-	must(cli.ImportPrivKey(wif,txid,true))
+	// Imports deck and sets the Account name to the deckid (txid)
+	must(cli.ImportPrivKey(wif,txid,false))
 	return
 }
+func Scan(height uint64){
+	log.Print("Rescanning Blockchain..")
+	err := cli.RescanBlockchain(height)
+	must(err)
+}
 
+func GetBlockHeight(txid string) uint64{
+	rawtx, err := cli.GetRawTransaction(txid,true)
+	block, err := cli.GetBlock(rawtx.BlockHash)
+	must(err)
+	return block.Height
+}
 
 func RootTransactions() []string{
 	var txs []string
@@ -73,6 +90,15 @@ func GetSender(childTx ppcd.RawTransaction ) (sender string){
 	return
 }
 
+func GetReceiver(rawtx ppcd.RawTransaction ) (receiver string){
+	// Define that vin[0] is from the targeted transaction sender
+	receiver = ""
+	if len(rawtx.Vout[0].ScriptPubKey.Addresses) > 0 {
+		receiver = rawtx.Vout[0].ScriptPubKey.Addresses[0]
+	}
+	return
+}
+
 func GetMetaData(rawTx ppcd.RawTransaction) string{
 	// Retrieves OP_RETURN Data from raw transaction
 	asm := rawTx.Vout[1].ScriptPubKey.Asm
@@ -90,4 +116,66 @@ func DeckParse(opReturn string) (Deck *protobuf.DeckSpawn){
 	// Returns Unmarshalled bytes as Deck
 	Deck = protobuf.ParseDeck(hexBytes)
 	return
+}
+
+func CardParse(opReturn string) (Card *protobuf.CardTransfer){
+	// convert hex string to bytes
+	hexBytes, err := hex.DecodeString(opReturn)
+	must(err)
+	// Returns Unmarshalled bytes as Deck
+	Card = protobuf.ParseCard(hexBytes)
+	return
+}
+
+func ValidateDeckBasic(receiver string, deck *protobuf.DeckSpawn) error{
+	if deck.Name == ""{
+		return errors.New("deck name cannot be empty")
+	}
+	if _,ok := protobuf.DeckSpawn_MODE_name[deck.IssueMode]; !ok{
+		return errors.New("issue mode not valid/supported")
+	}
+	if receiver != net.Address{
+		return errors.New("deckspawn must be sent to main p2th address to be valid")
+	}
+	return nil
+}
+
+func ValidateCardBasic(deckid string, rawtx ppcd.RawTransaction, card *protobuf.CardTransfer){
+	sender:= GetSender(rawtx)
+	receiver := GetReceiver(rawtx)
+	owner := string(storage.Get("Decks",deckid))
+	if sender != owner {
+		// Check sender balance
+		balance := storage.Get(sender,"Balance-"+deckid)
+		for _, val := range card.Amount {
+			if byteUint64(balance) < val {
+
+			}
+		}
+	}
+	if sender == owner{
+
+		storage.Put(receiver,"Balance-"+deckid,uint64Byte(card.Amount))
+	}
+
+	protobuf.CardTransfer{
+		Version:              0,
+		Amount:               nil,
+		NumberOfDecimals:     0,
+		AssetSpecificData:    nil,
+		XXX_NoUnkeyedLiteral: struct{}{},
+		XXX_unrecognized:     nil,
+		XXX_sizecache:        0,
+	}
+
+}
+
+
+func uint64Byte( value uint64) (b []byte){
+	b = make([]byte,8)
+	binary.BigEndian.PutUint64(b, value)
+}
+
+func byteUint64( value []byte) (val uint64){
+	val = binary.BigEndian.Uint64(value)
 }
