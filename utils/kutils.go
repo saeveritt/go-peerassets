@@ -8,21 +8,14 @@ import (
 )
 
 func GetParams() *networks.NetParameters{
-	network := networks.Default()
-	if network == "Peercoin"{
-		return networks.Peercoin()
-	}
-	if network == "Peercoin-Testnet"{
-		return networks.PeercoinTestnet()
-	}
-	return networks.PeercoinTestnet()
+
+	return networks.Default()
 }
 
 func ToWIF(priv string) string{
 	prefix := GetParams().WIFPrefix
 	suffix := "01" // Default is compressed
 	extended := prefix + priv + suffix
-	log.Print(extended)
 	hexBytes, err := hex.DecodeString(extended)
 	if err != nil{
 		log.Print(err)
