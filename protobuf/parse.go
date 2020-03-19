@@ -12,7 +12,7 @@ func ParseDeck(buf []byte) *DeckSpawn{
 	}
 	return Deck
 }
-/*
+
 func ParseCard(buf []byte) *CardTransfer{
 	Card := &CardTransfer{}
 	err := Card.XXX_Unmarshal(buf)
@@ -21,4 +21,3 @@ func ParseCard(buf []byte) *CardTransfer{
 	}
 	return Card
 }
-*/
