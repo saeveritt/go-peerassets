@@ -3,13 +3,11 @@ package utils
 import (
 	"encoding/binary"
 	"errors"
-	"github.com/saeveritt/go-peerassets/storage"
 	ppcd "github.com/saeveritt/go-peercoind"
 	"log"
 	"github.com/saeveritt/go-peerassets/protobuf"
 	"github.com/saeveritt/go-peerassets/rpc"
 	"github.com/saeveritt/go-peerassets/networks"
-	"strconv"
 	"strings"
 	"encoding/hex"
 )
@@ -140,42 +138,34 @@ func ValidateDeckBasic(receiver string, deck *protobuf.DeckSpawn) error{
 	return nil
 }
 
-func ValidateCardBasic(deckid string, rawtx ppcd.RawTransaction, card *protobuf.CardTransfer){
-	sender:= GetSender(rawtx)
-	receiver := GetReceiver(rawtx)
-	owner := string(storage.Get("Decks",deckid))
-	if sender != owner {
-		// Check sender balance
-		balance := storage.Get(sender,"Balance-"+deckid)
-		for _, val := range card.Amount {
-			if byteUint64(balance) < val {
-
-			}
-		}
-	}
-	if sender == owner{
-
-		storage.Put(receiver,"Balance-"+deckid,uint64Byte(card.Amount))
-	}
-
-	protobuf.CardTransfer{
-		Version:              0,
-		Amount:               nil,
-		NumberOfDecimals:     0,
-		AssetSpecificData:    nil,
-		XXX_NoUnkeyedLiteral: struct{}{},
-		XXX_unrecognized:     nil,
-		XXX_sizecache:        0,
-	}
-
-}
+//func ValidateCardBasic(deckid string, rawtx ppcd.RawTransaction, card *protobuf.CardTransfer){
+//	sender:= GetSender(rawtx)
+//	receiver := GetReceiver(rawtx)
+//	owner := string(storage.Get("Decks",deckid))
+//	if sender != owner {
+//		// Check sender balance
+//		balance := storage.Get(sender,"Balance-"+deckid)
+//		for _, val := range card.Amount {
+//			if byteUint64(balance) < val {
+//
+//			}
+//		}
+//	}
+//	if sender == owner{
+//
+//		storage.Put(receiver,"Balance-"+deckid,uint64Byte(card.Amount))
+//	}
+//
+//}
 
 
 func uint64Byte( value uint64) (b []byte){
 	b = make([]byte,8)
 	binary.BigEndian.PutUint64(b, value)
+	return
 }
 
 func byteUint64( value []byte) (val uint64){
 	val = binary.BigEndian.Uint64(value)
+	return
 }

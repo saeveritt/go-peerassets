@@ -1,9 +1,11 @@
 package networks
 
-func Default() string{
+func Default() *NetParameters{
 	// Set Default Network here
 	// ex. "Peercoin-Testnet", "Peercoin"
-	return "Peercoin-Testnet"
+	net := "Peercoin-Test"
+	if net == "Peercoin-Test"{return PeercoinTestnet()}
+	return Peercoin()
 }
 
 type NetParameters struct{
