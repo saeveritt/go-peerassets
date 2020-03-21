@@ -84,3 +84,32 @@ func BitcoinCashTestnet() *NetParameters {
 	p.Password = "pothos"
 	return &p
 }
+
+func Litecoin() *NetParameters {
+	p := NetParameters{}
+	p.Name = "Litecoin"
+	p.Network = "LTC"
+	p.Address = ""
+	p.WIF = ""
+	p.WIFPrefix = "32" //0x32
+	p.Fee = 0.001 // Same as PeerAssets Fee but also same as LTC base fee
+	p.Host = "localhost"
+	p.Port = 9333
+	p.User = "pothos"
+	p.Password = "pothos"
+	return &p
+}
+
+func LitecoinTestnet() *NetParameters {
+	p := NetParameters{}
+	p.Name = "Litecoin-Testnet"
+	p.Network = "tLTC"
+	p.Address = ""
+	p.WIF = ""
+	p.WIFPrefix = "3a" // 0x3a
+	p.Fee = 0.001 // Same as PeerAssets Fee but also same as LTC base fee
+	p.Host = "localhost"
+	p.Port = 19335
+	p.User = "pothos"
+	p.Password = "pothos"
+}
