@@ -1,10 +1,10 @@
 package utils
 
 import (
-	"log"
-	"github.com/saeveritt/go-peerassets/networks"
-	"encoding/hex"
 	"crypto/sha256"
+	"encoding/hex"
+	"github.com/saeveritt/go-peerassets/networks"
+	"log"
 )
 
 func GetParams() *networks.NetParameters{
@@ -22,7 +22,6 @@ func ToWIF(priv string) string{
 	}
 	checkSum := CheckSum(hexBytes)
 	extended = extended + checkSum
-	log.Print(extended)
 	hexBytes, err = hex.DecodeString(extended)
 	if err != nil {
 		log.Fatal(err)

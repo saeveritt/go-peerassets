@@ -1,18 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/saeveritt/go-peerassets/storage"
+	"github.com/saeveritt/go-peerassets/utils"
 	"log"
 	"net/http"
 )
 
 func init(){
-	//utils.ImportRootP2TH()
-	////utils.Scan(0)
-	storage.Connect()
+	utils.ImportRootP2TH()
 	storage.PutRootAsset()
-	storage.Close()
 }
 
 var(
@@ -33,16 +32,17 @@ func postAssets(w http.ResponseWriter, r *http.Request) {
 
 
 func main() {
-	//j, _ := storage.GetDecks()
-	//fmt.Printf("%v", j)
+	server := "localhost"
+	port := "8089"
 	r := mux.NewRouter()
 
 	api := r.PathPrefix("/api/v1").Subrouter()
 	api.HandleFunc("/assets", getAssets).Methods(http.MethodGet)
 	api.HandleFunc("/assets", postAssets).Methods(http.MethodPost)
 	api.HandleFunc("/address", postAssets).Methods(http.MethodPost)
-
-	log.Fatal(http.ListenAndServe(":8089", r))
+	fmt.Println("\nStarting go-peerassets server...")
+	fmt.Println("----Success! Running on "+server + ":" + port)
+	log.Fatal(http.ListenAndServe(server + ":" + port, r))
 }
 
 

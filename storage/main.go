@@ -65,7 +65,6 @@ func Put(bucket string,key string,value []byte) {
 		b, err = tx.CreateBucketIfNotExists([]byte(bucket))
 		must(err)
 		must(b.Put([]byte(key), value))
-		log.Printf("Put Bucket: %v, Key: %v, Value: %v", bucket, key , value )
 		return nil
 	})
 }
