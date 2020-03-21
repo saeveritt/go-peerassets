@@ -50,3 +50,37 @@ func PeercoinTestnet() *NetParameters {
 	p.Password = "pothos"
 	return &p
 }
+
+func BitcoinCash() *NetParameters {
+	// https://developer.bitcoin.com/mastering-bitcoin-cash/
+	p := NetParameters{}
+	p.Name = "BitcoinCash"
+	p.Network = "BCH"
+	// Leads with a p or q -- This needs to be defined at a later date
+	p.Address = ""
+	p.WIF = ""
+	p.WIFPrefix = "80" //0x80
+	p.Fee = 0.001 // Same as PeerAssets Fee
+	p.Host = "localhost"
+	p.Port = 8332
+	p.User = "pothos"
+	p.Password = "pothos"
+	return &p
+}
+
+func BitcoinCashTestnet() *NetParameters {
+	// https://developer.bitcoin.com/mastering-bitcoin-cash/
+	p := NetParameters{}
+	p.Name = "BitcoinCash-Testnet"
+	p.Network = "tBCH"
+	// Leads with a p or q -- This needs to be defined at a later date
+	p.Address = ""
+	p.WIF = ""
+	p.WIFPrefix = "ef" //0xef
+	p.Fee = 0.001 // Same as PeerAssets Fee
+	p.Host = "localhost"
+	p.Port = 18332
+	p.User = "pothos"
+	p.Password = "pothos"
+	return &p
+}
