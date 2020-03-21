@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/binary"
 	"errors"
+	"fmt"
 	ppcd "github.com/saeveritt/go-peercoind"
 	"log"
 	"github.com/saeveritt/go-peerassets/protobuf"
@@ -27,7 +28,9 @@ func must(err error){
 func ImportRootP2TH() {
 	resp, err := cli.ValidateAddress(net.Address)
 	must(err)
-	if resp.IsMine{return}
+	if resp.IsMine{
+		fmt.Println("P2TH previously imported. Scanning for assets...")
+		return}
 	// This will load the P2TH Main Registry with Account Name set to <Address>
 	must(cli.ImportPrivKey(net.WIF,net.Address,true))
 }

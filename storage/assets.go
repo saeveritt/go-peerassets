@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"fmt"
 	"log"
 	"github.com/saeveritt/go-peerassets/utils"
 	ppcd "github.com/saeveritt/go-peercoind"
@@ -15,8 +16,10 @@ var(
 
 func PutRootAsset(){
 	// Loads all valid assets registered to main p2th address registry
+	Connect()
 	txs := utils.RootTransactions()
 	rawtxs := utils.RawTransactions(txs)
+	i := 0 // Deck counter
 	for _, rawtx := range rawtxs{
 		if _,ok := subscribed["*"];!ok{continue}
 		if _,ok := subscribed[rawtx.Txid];!ok {
@@ -26,7 +29,7 @@ func PutRootAsset(){
 			deck := utils.DeckParse(opReturn)
 			err := utils.ValidateDeckBasic(receiver, deck)
 			if err != nil {
-				log.Print(err)
+				//log.Print(err)
 				continue
 			}
 			proto, err := deck.XXX_Marshal(nil, false)
@@ -35,10 +38,12 @@ func PutRootAsset(){
 				PutDeck(sender, rawtx)
 				PutDeckProto(proto, rawtx)
 				PutDeckCreator(sender, rawtx, proto)
+				i++
+				fmt.Printf("\r%d Decks Validated", i)
 			}
 		}
 	}
-	db.Close()
+	Close()
 }
 
 func PutDeck(sender string, rawtx ppcd.RawTransaction){
