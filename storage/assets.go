@@ -33,6 +33,7 @@ func PutRootAsset(){
 			must(err)
 			if sender != "coinbase/coinstake" && len(proto) != 0 {
 				PutDeck(sender, rawtx)
+				PutDeckProto(proto, rawtx)
 				PutDeckCreator(sender, rawtx, proto)
 			}
 		}
@@ -46,7 +47,12 @@ func PutDeck(sender string, rawtx ppcd.RawTransaction){
 	// Bucket: Decks, Key: DeckSpawn ID, Value: Deck Owner
 	Put("Decks",rawtx.Txid,[]byte(sender))
 }
-
+func PutDeckProto(proto []byte, rawtx ppcd.RawTransaction){
+	//Import deck information into local db
+	utils.ImportDeck(rawtx.Txid)
+	// Bucket: Decks, Key: DeckSpawn ID, Value: Deck Owner
+	Put("DecksProto",rawtx.Txid, proto)
+}
 func PutDeckCreator(sender string, rawtx ppcd.RawTransaction,proto []byte){
 	// Bucket: <sender address>, Key: "Deck-" + <Deckspawn ID>, Value: <proto>
 	Put(sender,"Deck-" + rawtx.Txid,proto)

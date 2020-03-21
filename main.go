@@ -1,19 +1,18 @@
 package main
 
 import (
-	"github.com/saeveritt/go-peerassets/storage"
-	//"github.com/saeveritt/go-peerassets/utils"
 	"github.com/gorilla/mux"
-	"net/http"
+	"github.com/saeveritt/go-peerassets/storage"
 	"log"
+	"net/http"
 )
 
 func init(){
 	//utils.ImportRootP2TH()
-	//utils.Scan(0)
-	//storage.Connect()
-	//storage.PutRootAsset()
-	//storage.Close()
+	////utils.Scan(0)
+	storage.Connect()
+	storage.PutRootAsset()
+	storage.Close()
 }
 
 var(
@@ -34,6 +33,8 @@ func postAssets(w http.ResponseWriter, r *http.Request) {
 
 
 func main() {
+	//j, _ := storage.GetDecks()
+	//fmt.Printf("%v", j)
 	r := mux.NewRouter()
 
 	api := r.PathPrefix("/api/v1").Subrouter()
