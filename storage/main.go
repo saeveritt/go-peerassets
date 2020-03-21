@@ -2,8 +2,10 @@ package storage
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/boltdb/bolt"
+	"github.com/saeveritt/go-peerassets/protobuf"
 	"log"
 	"time"
 )
@@ -11,9 +13,10 @@ import (
 var db *bolt.DB
 var err error
 
-func Connect(){
+func Connect() (*bolt.DB,error){
 	db, err = bolt.Open("storage/assets.db",0600,&bolt.Options{Timeout: 1 * time.Second})
 	must(err)
+	return db, err
 }
 
 func Close(){
@@ -32,15 +35,28 @@ func CreateBucket(bucket string,) {
 	})
 }
 
-func GetBucket(bucket string) *bolt.Bucket{
-	var b *bolt.Bucket
+func GetDecks() ([]byte,error){
+	Connect()
+	res  := make(map[string]*protobuf.DeckSpawn)
 	db.View(func(tx *bolt.Tx) error{
-		b = tx.Bucket([]byte(bucket))
+		bucket := tx.Bucket([]byte("DecksProto"))
+		return bucket.ForEach( func(k []byte, v []byte) error{
+			d := protobuf.ParseDeck(v)
+			res[string(k)] = d
+			return nil
+		})
+
 		return nil
 	})
+	j,err := json.Marshal(res)
+	if err != nil{
+		return j, err
+	}
+	Close()
 	// Will return nil if bucket is not found
-	return b
+	return j, nil
 }
+
 
 func Put(bucket string,key string,value []byte) {
 	var b *bolt.Bucket
