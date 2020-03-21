@@ -112,4 +112,5 @@ func LitecoinTestnet() *NetParameters {
 	p.Port = 19335
 	p.User = "pothos"
 	p.Password = "pothos"
+	return &p
 }
