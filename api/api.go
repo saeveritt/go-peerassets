@@ -1,9 +1,11 @@
 package api
 
 import (
+	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/saeveritt/go-peerassets/storage"
 	"net/http"
+	"strconv"
 )
 
 
@@ -27,5 +29,13 @@ func getAssets(w http.ResponseWriter, r *http.Request) {
 func postAssets(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
+	r.ParseForm()
+	limit := r.Form.Get("limit")
+	l,_ := strconv.Atoi(limit)
+	page := r.Form.Get("page")
+	p,_ := strconv.Atoi(page)
+	j,_ := storage.GetDecksPages(l,p)
+	json.
+
 	w.Write([]byte(`{"message": "post called"}`))
 }

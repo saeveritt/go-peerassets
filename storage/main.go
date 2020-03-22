@@ -57,6 +57,33 @@ func GetDecks() ([]byte,error){
 	return j, nil
 }
 
+func GetDecksPages(limit int, page int) ([]byte,error){
+	Connect()
+	res  := make(map[string]*protobuf.DeckSpawn)
+	db.View(func(tx *bolt.Tx) error{
+		bucket := tx.Bucket([]byte("DecksProto"))
+		n := -1 //counter
+		return bucket.ForEach( func(k []byte, v []byte) error{
+			n++
+			if n >= page*limit-limit && n < page * limit {
+				d := protobuf.ParseDeck(v)
+				res[string(k)] = d
+			}
+			return nil
+		})
+
+		return nil
+	})
+	j,err := json.Marshal(res)
+	if err != nil{
+		return j, err
+	}
+	Close()
+	// Will return nil if bucket is not found
+	return j, nil
+}
+
+
 
 func Put(bucket string,key string,value []byte) {
 	var b *bolt.Bucket
