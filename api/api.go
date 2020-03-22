@@ -9,7 +9,7 @@ import (
 
 func AgaveRouter() *mux.Router {
 	r := mux.NewRouter()
-	api := r.PathPrefix("/api/v1").Subrouter()
+	api := r.PathPrefix("/v1").Subrouter()
 	api.HandleFunc("/assets", getAssets).Methods(http.MethodGet)
 	api.HandleFunc("/assets", postAssets).Methods(http.MethodPost)
 	api.HandleFunc("/address", postAssets).Methods(http.MethodPost)
