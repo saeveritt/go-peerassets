@@ -36,6 +36,9 @@ func getAssets(w http.ResponseWriter, r *http.Request) {
 	if l > 0 && page == "" {
 		j, _ = storage.GetDecksPages(l, 1)
 	}
+	if p > 0 && l > 0{
+		j, _ = storage.GetDecksPages(l, p)
+	}
 
 	w.Write(j)
 }
