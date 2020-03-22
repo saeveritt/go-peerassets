@@ -15,7 +15,7 @@ func init(){
 }
 
 func main() {
-	server := "localhost"
+	server := "0.0.0.0"
 	port := "8089"
 	r := api.AgaveRouter()
 	fmt.Println("\nStarting go-peerassets server...")
