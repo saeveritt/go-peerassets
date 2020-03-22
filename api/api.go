@@ -1,7 +1,6 @@
 package api
 
 import (
-	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/saeveritt/go-peerassets/storage"
 	"net/http"
@@ -13,29 +12,29 @@ func AgaveRouter() *mux.Router {
 	r := mux.NewRouter()
 	api := r.PathPrefix("/v1").Subrouter()
 	api.HandleFunc("/assets", getAssets).Methods(http.MethodGet)
-	api.HandleFunc("/assets", postAssets).Methods(http.MethodPost)
-	api.HandleFunc("/address", postAssets).Methods(http.MethodPost)
+	//api.HandleFunc("/assets", postAssets).Methods(http.MethodPost)
+	//api.HandleFunc("/address", postAssets).Methods(http.MethodPost)
 	return r
 }
 
 
 func getAssets(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	j, _ := storage.GetDecks()
-	w.Write(j)
-
-}
-
-func postAssets(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	r.ParseForm()
+	var j []byte
 	limit := r.Form.Get("limit")
-	l,_ := strconv.Atoi(limit)
+	l, _ := strconv.Atoi(limit)
 	page := r.Form.Get("page")
-	p,_ := strconv.Atoi(page)
-	j,_ := storage.GetDecksPages(l,p)
-	json.
+	p, _ := strconv.Atoi(page)
 
-	w.Write([]byte(`{"message": "post called"}`))
+	if page == "" && limit == "" {
+		j, _ = storage.GetDecks()
+	}
+	if p > 0 && limit == "" {
+		j, _ = storage.GetDecksPages(10, p)
+	}
+	if l > 0 && page == "" {
+		j, _ = storage.GetDecksPages(l, 1)
+	}
+
+	w.Write(j)
 }
