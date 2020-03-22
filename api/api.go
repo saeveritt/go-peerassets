@@ -21,9 +21,10 @@ func AgaveRouter() *mux.Router {
 func getAssets(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var j []byte
-	limit := r.Form.Get("limit")
+
+	limit := r.URL.Query().Get("limit")
 	l, _ := strconv.Atoi(limit)
-	page := r.Form.Get("page")
+	page := r.URL.Query().Get("page")
 	p, _ := strconv.Atoi(page)
 
 	if page == "" && limit == "" {
