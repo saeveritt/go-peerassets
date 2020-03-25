@@ -83,6 +83,36 @@ func GetDecksPages(limit int, page int) ([]byte,error){
 	return j, nil
 }
 
+func GetAddress(address string)([]byte,error){
+	Connect()
+	resD  := make(map[string]*protobuf.DeckSpawn)
+	resC  := make(map[string]*protobuf.CardTransfer)
+
+	db.View(func(tx *bolt.Tx) error{
+		bucket := tx.Bucket([]byte(address))
+		return bucket.ForEach( func(k []byte, v []byte) error{
+
+			if string(k)[0:5] == "Deck-"{
+				resD[string(k[5:])] = protobuf.ParseDeck(v)
+			}
+			if string(k)[0:5] == "Card-"{
+				resC[string(k[5:])] = protobuf.ParseCard(v)
+			}
+			return nil
+		})
+		return nil
+	})
+	res := make(map[string]interface{})
+	res["decks"] = resD
+	res["cards"] = resC
+	j,err := json.Marshal(res)
+	if err != nil{
+		return j, err
+	}
+	Close()
+	// Will return nil if bucket is not found
+	return j, nil
+}
 
 
 func Put(bucket string,key string,value []byte) {

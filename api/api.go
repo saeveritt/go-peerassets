@@ -12,10 +12,18 @@ func AgaveRouter() *mux.Router {
 	r := mux.NewRouter()
 	api := r.PathPrefix("/v1").Subrouter()
 	api.HandleFunc("/assets", getAssets).Methods(http.MethodGet)
-	//api.HandleFunc("/assets", postAssets).Methods(http.MethodPost)
-	//api.HandleFunc("/address", postAssets).Methods(http.MethodPost)
+	api.HandleFunc("/address",getAddress).Methods(http.MethodGet)
 	return r
 }
+
+func getAddress( w http.ResponseWriter, r *http.Request){
+	w.Header().Set("Content-Type","application/json")
+	var j []byte
+	var address = r.URL.Query().Get("address")
+	j,_ = storage.GetAddress(address)
+	w.Write(j)
+}
+
 
 
 func getAssets(w http.ResponseWriter, r *http.Request) {
