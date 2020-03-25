@@ -118,38 +118,47 @@ func GetDecks(limit int, page int) ([]byte,error){
 
 
 
-func GetAddress(address string, txtype string)([]byte,error){
-	//make(map[string]string{"card":"Card-","deck":"Deck-"})
-	if txtype == "deck"{
-		res  := make(map[string]*protobuf.DeckSpawn)
+func GetAddress(address string, txType string, limit int, page int)([]byte,error){
+	var j []byte
+	// Make sure that type is either deck or card
+	if txType != "deck" && txType != "card"{
+		return j, nil
 	}
-	else if txtype == "card"{
-		res  := make(map[string]*protobuf.CardTransfer)
-	}
-	else{ return []byte, nil } 
-
+	// Create an empty map for the Response
+	res := make(map[string]interface{})
 	// Connect to local db
 	Connect()
 
+	// This View is for processing requests with page and limit arguments
 	db.View(func(tx *bolt.Tx) error{
 		bucket := tx.Bucket([]byte(address))
-		return bucket.ForEach( func(k []byte, v []byte) error{
-
-			if string(k)[0:5] == "Deck-"{
-				res[string(k[5:])] = protobuf.ParseDeck(v)
-			}
-			if string(k)[0:5] == "Card-"{
-				res[string(k[5:])] = protobuf.ParseCard(v)
-			}
-			return nil
+		n := -1
+		if txType == "deck"{
+			return bucket.ForEach( func(k []byte, v []byte) error {
+				n++
+				if n >= page*limit-limit && n < page * limit {
+					if string(k)[0:5] == "Deck-" {
+						res[string(k[5:])] = protobuf.ParseDeck(v)
+					}
+				}
+				return nil
+			})}
+		if txType == "card" {
+			//var res = make(map[string]*protobuf.CardTransfer)
+			return bucket.ForEach( func(k []byte, v []byte) error {
+				n++
+				if n >= page*limit-limit && n < page * limit {
+					if string(k)[0:5] == "Card-" {
+						res[string(k[5:])] = protobuf.ParseCard(v)
+					}
+				}
+				return nil
+			})}
+		return nil
 		})
 		// Close local db connection
 		Close()
-		return nil
-	})
-	res := make(map[string]interface{})
-	res["decks"] = resD
-	res["cards"] = resC
+
 	j,err := json.Marshal(res)
 	if err != nil{
 		return j, err
