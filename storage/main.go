@@ -36,30 +36,47 @@ func CreateBucket(bucket string,) {
 }
 
 func GetDecks() ([]byte,error){
+	// Connect to local db
 	Connect()
+	// Create a map, key < Deck ID >, Value < Deck Protobuf >
 	res  := make(map[string]*protobuf.DeckSpawn)
+	// Create a View to query the local database
+	// Input to db.View is a Function that will iterate and grab Keys and Values
 	db.View(func(tx *bolt.Tx) error{
+		// DecksProto bucket contains Key: <Deck ID>, Value: < Deck Protobuf >
 		bucket := tx.Bucket([]byte("DecksProto"))
+		// Setup a return which will iterate through each Key, Value in Bucket and append to map
 		return bucket.ForEach( func(k []byte, v []byte) error{
+			// Grab the <Deck Protobuf> and Parse it into a Deck Object
 			d := protobuf.ParseDeck(v)
+			// Create an entry in the res map where key is string(<Deck ID>)
+			// and the value is set to the Deck Object
 			res[string(k)] = d
+			// Return nil because there were no errors iterating through the bucket
 			return nil
 		})
-
+		// Return nil after apending to map
 		return nil
 	})
+	// Create a variable to store the JSON byte array which will be used to write the Response
 	j,err := json.Marshal(res)
+
 	if err != nil{
 		return j, err
 	}
+	// Close local db connection
 	Close()
 	// Will return nil if bucket is not found
 	return j, nil
 }
 
 func GetDecksPages(limit int, page int) ([]byte,error){
+	// Connect to local db
 	Connect()
+	// Create a map, key < Deck ID >, Value < Deck Protobuf >
 	res  := make(map[string]*protobuf.DeckSpawn)
+	// Create a View to query the local database
+	// Input to db.View is a Function that will iterate and grab Keys and Values
 	db.View(func(tx *bolt.Tx) error{
 		bucket := tx.Bucket([]byte("DecksProto"))
 		n := -1 //counter
