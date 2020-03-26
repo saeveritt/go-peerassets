@@ -116,8 +116,6 @@ func GetDecks(limit int, page int) ([]byte,error){
 	return j, nil
 }
 
-
-
 func GetAddress(address string, txType string, limit int, page int)([]byte,error){
 	var j []byte
 	// Make sure that type is either deck or card
@@ -128,32 +126,26 @@ func GetAddress(address string, txType string, limit int, page int)([]byte,error
 	res := make(map[string]interface{})
 	// Connect to local db
 	Connect()
-
+	prefix := map[string][]byte{"card":[]byte("Card-"),"deck":[]byte("Deck-")}
 	// This View is for processing requests with page and limit arguments
 	db.View(func(tx *bolt.Tx) error{
-		bucket := tx.Bucket([]byte(address))
+		fmt.Print(address)
+		c := tx.Bucket([]byte(address)).Cursor()
 		n := -1
-		if txType == "deck"{
-			return bucket.ForEach( func(k []byte, v []byte) error {
-				n++
-				if n >= page*limit-limit && n < page * limit {
-					if string(k)[0:5] == "Deck-" {
+		// Use Seek to iterate through the bucket based on specified prefix
+		for k,v := c.Seek(prefix[txType]); k != nil && bytes.HasPrefix(k,prefix[txType]); k,v = c.Next(){
+			n++
+			// Limit the output results based on GET arguments passed in request
+			if n >= page*limit-limit && n < page * limit {
+				// Handle the parsing based on what "type" argument was passed
+				switch txType {
+					case "card":
+						res[string(k[5:])] = protobuf.ParseCard(v)
+					case "deck":
 						res[string(k[5:])] = protobuf.ParseDeck(v)
 					}
 				}
-				return nil
-			})}
-		if txType == "card" {
-			//var res = make(map[string]*protobuf.CardTransfer)
-			return bucket.ForEach( func(k []byte, v []byte) error {
-				n++
-				if n >= page*limit-limit && n < page * limit {
-					if string(k)[0:5] == "Card-" {
-						res[string(k[5:])] = protobuf.ParseCard(v)
-					}
-				}
-				return nil
-			})}
+			}
 		return nil
 		})
 		// Close local db connection
@@ -197,30 +189,4 @@ func Get(bucket string, key string) []byte{
 
 	})
 	return v
-}
-
-func PrefixScan(bucket string, keyPrefix string) map[string]string{
-
-	M := make(map[string]string)
-	count := 0
-
-	db.View(func(tx *bolt.Tx) error {
-		// Assume bucket exists and has keys
-		b := tx.Bucket([]byte(bucket)).Cursor()
-
-		if b != nil {
-
-			prefix := []byte(keyPrefix)
-
-			for k, v := b.Seek(prefix); bytes.HasPrefix(k, prefix); k, v = b.Next() {
-				M[string(k)] = string(v)
-				if count > 20000 {
-					break
-				}
-				count++
-			}
-		}
-		return nil
-	})
-	return M
 }
