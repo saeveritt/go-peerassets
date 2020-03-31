@@ -22,7 +22,7 @@ func PutRootAsset(){
 	i := 0 // Deck counter
 	for _, rawtx := range rawtxs{
 		if _,ok := subscribed["*"];!ok{continue}
-		if _,ok := subscribed[rawtx.Txid];!ok {
+		if _,ok := subscribed[rawtx.Txid];!ok || subscribed["*"] {
 			sender := utils.GetSender(rawtx)
 			receiver := utils.GetReceiver(rawtx)
 			opReturn := utils.GetMetaData(rawtx)
@@ -75,7 +75,7 @@ func PutCards(deckid string){
 	rawtxs := utils.RawTransactions(txs)
 	for _, rawtx := range rawtxs{
 		if _,ok := subscribed["*"];!ok{continue}
-		if _,ok := subscribed[rawtx.Txid];!ok {
+		if _,ok := subscribed[rawtx.Txid];!ok || subscribed["*"] {
 			sender := utils.GetSender(rawtx)
 			receiver := utils.GetReceiver(rawtx)
 			opReturn := utils.GetMetaData(rawtx)
