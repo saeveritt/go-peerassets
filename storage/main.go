@@ -3,6 +3,7 @@ package storage
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/boltdb/bolt"
 	"github.com/saeveritt/go-peerassets/protobuf"
@@ -40,6 +41,7 @@ func GetDecks() ([]byte,error){
 	res  := make(map[string]*protobuf.DeckSpawn)
 	db.View(func(tx *bolt.Tx) error{
 		bucket := tx.Bucket([]byte("DecksProto"))
+		if bucket == nil{ return errors.New("bucket does not exist")}
 		return bucket.ForEach( func(k []byte, v []byte) error{
 			d := protobuf.ParseDeck(v)
 			res[string(k)] = d

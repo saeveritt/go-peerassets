@@ -7,12 +7,12 @@ import (
 	ppcd "github.com/saeveritt/go-peercoind"
 )
 
-var(
-	//add to subscribed map the list of deck id's you wish to import
-	subscribed = map[string]bool{
-		"*": true,
-	}
-)
+//var(
+//	//add to subscribed map the list of deck id's you wish to import
+//	subscribed = map[string]bool{
+//		"*": true,
+//	}
+//)
 
 func PutRootAsset(){
 	// Loads all valid assets registered to main p2th address registry
@@ -21,8 +21,8 @@ func PutRootAsset(){
 	rawtxs := utils.RawTransactions(txs)
 	i := 0 // Deck counter
 	for _, rawtx := range rawtxs{
-		if _,ok := subscribed["*"];!ok{continue}
-		if _,ok := subscribed[rawtx.Txid];!ok {
+		//if _,ok := subscribed["*"];!ok{continue}
+		//if _,ok := subscribed[rawtx.Txid];!ok {
 			sender := utils.GetSender(rawtx)
 			receiver := utils.GetReceiver(rawtx)
 			opReturn := utils.GetMetaData(rawtx)
@@ -42,7 +42,6 @@ func PutRootAsset(){
 				fmt.Printf("\r%d Decks Validated", i)
 			}
 		}
-	}
 	Close()
 }
 
@@ -74,8 +73,8 @@ func PutCards(deckid string){
 	txs := utils.RootTransactions()
 	rawtxs := utils.RawTransactions(txs)
 	for _, rawtx := range rawtxs{
-		if _,ok := subscribed["*"];!ok{continue}
-		if _,ok := subscribed[rawtx.Txid];!ok {
+		//if _,ok := subscribed["*"];!ok{continue}
+		//if _,ok := subscribed[rawtx.Txid];!ok {
 			sender := utils.GetSender(rawtx)
 			receiver := utils.GetReceiver(rawtx)
 			opReturn := utils.GetMetaData(rawtx)
@@ -92,6 +91,6 @@ func PutCards(deckid string){
 				PutDeckCreator(sender, rawtx, proto)
 			}
 		}
-	}
+	//}
 	db.Close()
 }
