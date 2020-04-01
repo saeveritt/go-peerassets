@@ -32,7 +32,7 @@ func ImportRootP2TH() {
 		fmt.Println("P2TH previously imported. Scanning for assets...")
 		return}
 	// This will load the P2TH Main Registry with Account Name set to <Address>
-	must(cli.ImportPrivKey(net.WIF,net.Address,true))
+	must(cli.ImportPrivKey(net.WIF,net.Address,false))
 }
 
 func ImportDeck(txid string){

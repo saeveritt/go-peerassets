@@ -32,6 +32,8 @@ func getTransactions( w http.ResponseWriter, r *http.Request){
 	l,p,_ := pageLimit( limit, page)
 	// If address is not empty
 	if address != "" && txType != ""{
+		log.Println(address)
+		log.Println(txType)
 		// Check for address in storage. Each address has its own dedicated bucket.
 		j, _ = storage.GetAddress(address,txType,l,p)
 		// if there was an error writing the JSON byte array,it will send empty array
@@ -68,7 +70,7 @@ func pageLimit(limit string, page string) (int,int, error){
 	l, _ := strconv.Atoi(limit)
 	p, _ := strconv.Atoi(page)
 
-	if (p == 0 && l == 0) || (p > 0 && l > 0){
+	if  (p > 0 && l > 0){
 		return l, p, nil
 	}
 	if p > 0 && l == 0 {
@@ -76,6 +78,9 @@ func pageLimit(limit string, page string) (int,int, error){
 	}
 	if p == 0 && l > 0 {
 		return l, 1, nil
+	}
+	if p==0 && l ==0 {
+		return 10,1,nil
 	}
 	return 0,0, nil
 }

@@ -127,6 +127,7 @@ func GetAddress(address string, txType string, limit int, page int)([]byte,error
 	// Connect to local db
 	Connect()
 	prefix := map[string][]byte{"card":[]byte("Card-"),"deck":[]byte("Deck-")}
+	log.Print(prefix)
 	// This View is for processing requests with page and limit arguments
 	db.View(func(tx *bolt.Tx) error{
 		fmt.Print(address)
