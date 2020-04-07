@@ -119,7 +119,7 @@ func GetDecks(limit int, page int) ([]byte,error){
 func GetAddress(address string, txType string, limit int, page int)([]byte,error){
 	var j []byte
 	// Make sure that type is either deck or card
-	if txType != "deck" && txType != "card"{
+	if (txType != "deck" && txType != "card") || len(address) != 34{
 		return j, nil
 	}
 	// Create an empty map for the Response

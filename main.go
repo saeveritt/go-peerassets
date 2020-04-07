@@ -12,24 +12,26 @@ import (
 
 func init(){
 	loadFlag := flag.Bool("load", false, "Import Root P2TH Assets")
+	portFlag := flag.String("port", "8089", "Port to start server on")
 	flag.Parse()
-
 	if *loadFlag {
 		utils.ImportRootP2TH()
 		storage.PutRootAsset()
 	}
+	StartServer(*portFlag)
+
 }
 
 func main() {
+}
 
-
-
+func StartServer(port string){
 	server := "0.0.0.0"
-	port := "8089"
 	r := api.AgaveRouter()
 	fmt.Println("\nStarting go-peerassets server...")
 	fmt.Println("----Success! Running on "+server + ":" + port)
 	log.Fatal(http.ListenAndServe(server + ":" + port, r))
+
 }
 
 
