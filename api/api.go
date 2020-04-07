@@ -1,12 +1,15 @@
 package api
 
 import (
+	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/saeveritt/go-peerassets/storage"
 	"log"
 	"net/http"
 	"strconv"
 )
+
+var error = make(map[string]interface{})
 
 func AgaveRouter() *mux.Router {
 	// Create new router
@@ -39,7 +42,9 @@ func getTransactions( w http.ResponseWriter, r *http.Request){
 		w.Write(j)
 	}else{
 		// if address argument is empty, return empty byte array
-		w.Write(j)
+		error["error"] = "Invalid arguments"
+		j, _ = json.Marshal(error)
+		w.Write( j )
 	}
 }
 
