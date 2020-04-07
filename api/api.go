@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-var error = make(map[string]interface{})
+var apiError = make(map[string]interface{})
 
 func AgaveRouter() *mux.Router {
 	// Create new router
@@ -42,8 +42,8 @@ func getTransactions( w http.ResponseWriter, r *http.Request){
 		w.Write(j)
 	}else{
 		// if address argument is empty, return empty byte array
-		error["error"] = "Invalid arguments"
-		j, _ = json.Marshal(error)
+		apiError["error"] = "Invalid arguments"
+		j, _ = json.Marshal(apiError)
 		w.Write( j )
 	}
 }
