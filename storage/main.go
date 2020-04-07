@@ -17,7 +17,7 @@ func must(err error){
 	// Standard error handler. Will os.exit() on log.Fatal if error occurs.
 	// Only use for db Connection
 	if err != nil{
-		log.Fatal(err)
+		log.Print(err)
 	}
 }
 
