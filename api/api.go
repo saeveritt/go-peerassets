@@ -31,7 +31,7 @@ func getTransactions( w http.ResponseWriter, r *http.Request){
 	var page = r.URL.Query().Get("page")
 	l,p,_ := pageLimit( limit, page)
 	// If address is not empty
-	if len(address) != 34 && txType != ""{
+	if len(address) == 34 && txType != ""{
 		// Check for address in storage. Each address has its own dedicated bucket.
 		j, _ = storage.GetAddress(address,txType,l,p)
 		// if there was an error writing the JSON byte array,it will send empty array
