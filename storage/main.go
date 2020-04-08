@@ -143,7 +143,10 @@ func GetAddress(address string, txType string, limit int, page int)([]byte,error
 				// Handle the parsing based on what "type" argument was passed
 				switch txType {
 					case "card":
-						res = append(res,protobuf.ParseCard(v))
+						c := protobuf.ParseCard(v)
+						send := address == c.Sender
+						j := FormatCardResponse(c,send)
+						res = append(res,j)
 					case "deck":
 						d := protobuf.ParseDeck(v)
 						j := FormatDeckResponse(string(k[5:]), d)
@@ -162,6 +165,21 @@ func GetAddress(address string, txType string, limit int, page int)([]byte,error
 	}
 	// Will return nil if bucket is not found
 	return j, nil
+}
+
+func FormatCardResponse( c *protobuf.CardTransfer, send bool) map[string]interface{}{
+	j := make(map[string]interface{})
+	if send { j["type"] = "send"}else{ j["type"] = "receive"}
+	j["deck_id"] = c.DeckId
+	j["card_id"] = c.CardId
+	j["block_height"] = c.BlockHeight[0]
+	j["tx_index"] = c.TxIndex[0]
+	j["card_index"] = c.CardIndex[0]
+	j["sender"] = c.Sender
+	j["receiver"] = c.Receiver[0]
+	j["amount"] = c.Amount[0]
+	j["data"] = c.AssetSpecificData
+	return j
 }
 
 func FormatDeckResponse(deckid string, d *protobuf.DeckSpawn) map[string]interface{}{
