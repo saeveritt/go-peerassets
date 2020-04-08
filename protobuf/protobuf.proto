@@ -38,7 +38,7 @@ bytes asset_specific_data = 5;
 // token amount to be burned upon each card transfer
 // to be encoded as: fee * 10**number_of_decimals
 // defaults to zero
-uint32 fee = 6;
+int32 fee = 6;
 }
 
 // Transaction data for:
@@ -47,16 +47,41 @@ uint32 fee = 6;
 // - Card burn transaction
 message CardTransfer {
 // Protocol version number
-uint32 version = 1;
+int32 version = 1;
 
 // Amount to transfer
-repeated uint64 amount = 2;
+repeated int64 amount = 2;
 
 // Number of decimals
 // Should be equal to the number specified in the deck spawn transaction.
 // Encoded in this message for easy validation
-uint32 number_of_decimals = 3;
+int32 number_of_decimals = 3;
 
 // Free form asset specific data (optional)
 bytes asset_specific_data = 4;
+
+// Deck ID
+
+string deck_id = 5;
+
+// Transaction ID
+string card_id = 6;
+
+// Sender
+
+string sender = 7;
+
+// Receivers
+
+repeated string receiver = 8;
+
+// Block Number
+repeated int32 block_height = 9;
+
+// TX Index
+
+repeated int64 tx_index = 10;
+
+// Card Index
+repeated int32 card_index = 11;
 }

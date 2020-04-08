@@ -2,9 +2,11 @@ package storage
 
 import (
 	"fmt"
-	"log"
+	"github.com/saeveritt/go-peerassets/protobuf"
 	"github.com/saeveritt/go-peerassets/utils"
 	ppcd "github.com/saeveritt/go-peercoind"
+	"log"
+	"strconv"
 )
 
 var(
@@ -71,27 +73,23 @@ func RescanBlockchain(txid string) {
 
 func PutCards(deckid string){
 	// Loads all valid assets registered to main p2th address registry
-	txs := utils.RootTransactions()
-	rawtxs := utils.RawTransactions(txs)
-	for _, rawtx := range rawtxs{
-		if _,ok := subscribed["*"];!ok{continue}
-		if _,ok := subscribed[rawtx.Txid];!ok || subscribed["*"] {
-			sender := utils.GetSender(rawtx)
-			receiver := utils.GetReceiver(rawtx)
-			opReturn := utils.GetMetaData(rawtx)
-			deck := utils.DeckParse(opReturn)
-			err := utils.ValidateDeckBasic(receiver, deck)
-			if err != nil {
-				log.Print(err)
-				continue
-			}
-			proto, err := deck.XXX_Marshal(nil, false)
-			must(err)
-			if sender != "coinbase/coinstake" && len(proto) != 0 {
-				PutDeck(sender, rawtx)
-				PutDeckCreator(sender, rawtx, proto)
-			}
-		}
+	Connect()
+	cards := utils.GetCards(deckid)
+	for _, card := range cards{
+		log.Print(card)
+		ProcessDeckCardKeys(card)
 	}
-	db.Close()
+	Close()
+}
+
+func ProcessDeckCardKeys(card *protobuf.CardTransfer){
+	height:= strconv.Itoa( int(card.BlockHeight[0]) )
+	txIndex := strconv.Itoa( int(card.TxIndex[0]) )
+	cardIndex := strconv.Itoa( int(card.CardIndex[0]) )
+	baseKey := card.DeckId + "-" + height + "-" + txIndex + "-" + cardIndex
+	sendKey := "Card-Send-"+ baseKey
+	receiveKey := "Card-Receive-" + baseKey
+	proto,_ := card.XXX_Marshal(nil,false)
+	Put(card.Sender,sendKey, proto)
+	Put(card.Receiver[0],receiveKey, proto)
 }

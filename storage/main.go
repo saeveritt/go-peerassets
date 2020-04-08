@@ -58,7 +58,7 @@ func GetDecks(limit int, page int) ([]byte,error){
 	// Connect to local db
 	Connect()
 	// Create a map, key < Deck ID >, Value < Deck Protobuf >
-	res  := make(map[string]*protobuf.DeckSpawn)
+	var res []interface{}
 	bucketName := "DecksProto"
 	// Create a View to query the local database
 	// Input to db.View is a Function that will iterate and grab Keys and Values
@@ -70,9 +70,10 @@ func GetDecks(limit int, page int) ([]byte,error){
 			return bucket.ForEach( func(k []byte, v []byte) error{
 				// Grab the <Deck Protobuf> and Parse it into a Deck Object
 				d := protobuf.ParseDeck(v)
+				j := FormatDeckResponse(string(k), d)
 				// Create an entry in the res map where key is string(<Deck ID>)
 				// and the value is set to the Deck Object
-				res[string(k)] = d
+				res = append(res,j)
 				// Return nil because there were no errors iterating through the bucket
 				return nil
 			})
@@ -93,9 +94,10 @@ func GetDecks(limit int, page int) ([]byte,error){
 				if n >= page*limit-limit && n < page * limit {
 					// Grab the <Deck Protobuf> and Parse it into a Deck Object
 					d := protobuf.ParseDeck(v)
+					j := FormatDeckResponse(string(k), d)
 					// Create an entry in the res map where key is string(<Deck ID>)
 					// and the value is set to the Deck Object
-					res[string(k)] = d
+					res = append(res,j)
 				}
 				// Return nil because there were no errors iterating through the bucket
 				return nil
@@ -123,7 +125,7 @@ func GetAddress(address string, txType string, limit int, page int)([]byte,error
 		return j, nil
 	}
 	// Create an empty map for the Response
-	res := make(map[string]interface{})
+	var res []interface{}
 	// Connect to local db
 	Connect()
 	prefix := map[string][]byte{"card":[]byte("Card-"),"deck":[]byte("Deck-")}
@@ -141,9 +143,11 @@ func GetAddress(address string, txType string, limit int, page int)([]byte,error
 				// Handle the parsing based on what "type" argument was passed
 				switch txType {
 					case "card":
-						res[string(k[5:])] = protobuf.ParseCard(v)
+						res = append(res,protobuf.ParseCard(v))
 					case "deck":
-						res[string(k[5:])] = protobuf.ParseDeck(v)
+						d := protobuf.ParseDeck(v)
+						j := FormatDeckResponse(string(k[5:]), d)
+						res = append(res, j)
 					}
 				}
 			}
@@ -160,6 +164,19 @@ func GetAddress(address string, txType string, limit int, page int)([]byte,error
 	return j, nil
 }
 
+func FormatDeckResponse(deckid string, d *protobuf.DeckSpawn) map[string]interface{}{
+	j := make(map[string]interface{})
+	j["txid"] = deckid
+	j["name"] = d.Name
+	j["version"] = d.Version
+	j["mode"] = protobuf.DeckSpawn_MODE_name[d.IssueMode]
+	j["decimals"] = d.NumberOfDecimals
+	j["data"] = d.AssetSpecificData
+	j["fee"] = d.Fee
+	return j
+
+}
+
 
 func Put(bucket string,key string,value []byte) {
 	var b *bolt.Bucket
@@ -167,6 +184,7 @@ func Put(bucket string,key string,value []byte) {
 	db.Update(func(tx *bolt.Tx) error {
 		b, err = tx.CreateBucketIfNotExists([]byte(bucket))
 		must(err)
+		if err != nil { return nil}
 		must(b.Put([]byte(key), value))
 		return nil
 	})
