@@ -14,16 +14,14 @@ func init(){
 	loadFlag := flag.Bool("load", false, "Import Root P2TH Assets")
 	portFlag := flag.String("port", "8089", "Port to start server on")
 	startFlag := flag.Bool("server",false,"Start server")
-	subscribeFlag := flag.String("subscribe","","Subscribe to Deck")
+	cardFlag := flag.Bool("cards",false,"Load All Cards")
 	flag.Parse()
 	if *loadFlag {
 		utils.ImportRootP2TH()
-		storage.PutRootAsset()
+		storage.PutRootAsset(false)
 	}
-	if *subscribeFlag != ""{
-		if *subscribeFlag == "*" {
-			storage.PutCards("d460651e1d9147770ec9d4c254bcc68ff5d203a86b97c09d00955fb3f714cab3")
-		}
+	if *cardFlag{
+		storage.PutAllCards()
 	}
 	StartServer(*startFlag, *portFlag)
 

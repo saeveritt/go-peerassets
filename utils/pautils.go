@@ -40,8 +40,13 @@ func ImportDeck(deckid string){
 	must(err)
 	wif := ToWIF(deckid)
 	// Imports deck and sets the Account name to the deckid (txid)
-	must(cli.ImportPrivKey(wif,deckid,true))
-	return
+	must(cli.ImportPrivKey(wif,deckid,false))
+	RescanBlockchain(deckid)
+}
+func RescanBlockchain(txid string) {
+	height := GetBlockHeight(txid)
+	log.Print("Scanning Transactions For: " + txid)
+	Scan(height)
 }
 
 func GetCards(deckid string) []*protobuf.CardTransfer{

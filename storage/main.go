@@ -10,8 +10,8 @@ import (
 	"time"
 )
 
-var db *bolt.DB
-var err error
+//var db *bolt.DB
+//var err error
 
 func must(err error){
 	// Standard error handler. Will os.exit() on log.Fatal if error occurs.
@@ -24,20 +24,14 @@ func must(err error){
 func Connect() (*bolt.DB,error){
 	// Open the local db file and set it to db. This modifies the global variable so that
 	// functions in this file can use it
-	db, err = bolt.Open("storage/assets.db",0600,&bolt.Options{Timeout: 1 * time.Second})
+	db, err := bolt.Open("storage/assets.db",0600,&bolt.Options{Timeout: 1 * time.Second})
 	must(err)
 	return db, err
 }
 
-func Close(){
-	// if Connection to db is Open, Close it.
-	if db.GoString() != "" {
-		db.Close()
-	}
-}
 func CreateBucket(bucket string,) {
 	// Connect to local db
-	Connect()
+	db,_ := Connect()
 	// Use db.Update and pass a function with a bolt.TX
 	db.Update(func(tx *bolt.Tx) error {
 		// Create the Bucket if it does not exist
@@ -51,12 +45,12 @@ func CreateBucket(bucket string,) {
 		return nil
 	})
 	// Close local db connection
-	Close()
+	db.Close()
 }
 
 func GetDecks(limit int, page int) ([]byte,error){
 	// Connect to local db
-	Connect()
+	db,_ :=Connect()
 	// Create a map, key < Deck ID >, Value < Deck Protobuf >
 	var res []interface{}
 	bucketName := "DecksProto"
@@ -113,7 +107,7 @@ func GetDecks(limit int, page int) ([]byte,error){
 		return j, err
 	}
 	// Close local db connection
-	Close()
+	db.Close()
 	// Will return nil if bucket is not found
 	return j, nil
 }
@@ -127,7 +121,7 @@ func GetAddress(address string, txType string, limit int, page int)([]byte,error
 	// Create an empty map for the Response
 	var res []interface{}
 	// Connect to local db
-	Connect()
+	db, _ := Connect()
 	prefix := map[string][]byte{"card":[]byte("Card-"),"deck":[]byte("Deck-")}
 	log.Print(prefix)
 	// This View is for processing requests with page and limit arguments
@@ -157,7 +151,7 @@ func GetAddress(address string, txType string, limit int, page int)([]byte,error
 		return nil
 		})
 		// Close local db connection
-		Close()
+		db.Close()
 
 	j,err := json.Marshal(res)
 	if err != nil{
@@ -197,6 +191,7 @@ func FormatDeckResponse(deckid string, d *protobuf.DeckSpawn) map[string]interfa
 
 
 func Put(bucket string,key string,value []byte) {
+	db, _ := Connect()
 	var b *bolt.Bucket
 	var err error
 	db.Update(func(tx *bolt.Tx) error {
@@ -206,9 +201,10 @@ func Put(bucket string,key string,value []byte) {
 		must(b.Put([]byte(key), value))
 		return nil
 	})
+	db.Close()
 }
 func Get(bucket string, key string) []byte{
-
+	db,_ := Connect()
 	var v []byte
 	db.View(func(tx *bolt.Tx) error {
 
@@ -225,5 +221,6 @@ func Get(bucket string, key string) []byte{
 		return nil
 
 	})
+	db.Close()
 	return v
 }
