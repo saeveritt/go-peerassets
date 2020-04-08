@@ -39,13 +39,13 @@ func getTransactions( w http.ResponseWriter, r *http.Request){
 		j, _ = storage.GetAddress(address,txType,l,p)
 		// if there was an error writing the JSON byte array,it will send empty array
 		// else it sends a JSON byte array Response with the results
-		w.WriteHeader(200)
+		//w.WriteHeader(200)
 		w.Write(j)
 	}else{
 		// if address argument is empty, return empty byte array
 		apiError["error"] = "Invalid arguments"
 		j, _ = json.Marshal(apiError)
-		w.WriteHeader(400)
+		//w.WriteHeader(400)
 		w.Write( j )
 	}
 }
