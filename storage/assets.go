@@ -59,14 +59,14 @@ func ImportSubscribed() error{
 		}
 		lastScanned := GetScanHeight()
 		if lastScanned != 0 {
-			log.Printf("Rescanning Blockchain from Height: %v", lastScanned)
+			fmt.Printf("Rescanning Blockchain from Height: %v", lastScanned)
 			current := utils.RescanBlockchain(lastScanned)
-			log.Printf("Rescanned to Height: %v", current)
+			fmt.Printf("Rescanned to Height: %v", current)
 		}else{
 			lowest := GetLowestBlock()
-			log.Printf("Rescanning Blockchain from Height: %v", lowest)
+			fmt.Printf("Rescanning Blockchain from Height: %v", lowest)
 			current := utils.RescanBlockchain(lowest)
-			log.Printf("Rescanned to Height: %v", current)
+			fmt.Printf("Rescanned to Height: %v", current)
 
 		}
 	return nil
