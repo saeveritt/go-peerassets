@@ -191,33 +191,34 @@ func GetDeckTransactions(deckid string, limit int, page int) ([]byte,error){
 	var res []interface{}
 	// Create a View to query the local database
 	// Input to db.View is a Function that will iterate and grab Keys and Values
-	if limit == 0 && page == 0 {
-		db.View(func(tx *bolt.Tx) error {
-			// DecksProto bucket contains Key: <Deck ID>, Value: < Deck Protobuf >
-			bucket := tx.Bucket([]byte(deckid))
-			// Setup a return which will iterate through each Key, Value in Bucket and append to map
-			return bucket.ForEach(func(k []byte, v []byte) error {
+	n := -1
+	db.View(func(tx *bolt.Tx) error {
+		// DecksProto bucket contains Key: <Deck ID>, Value: < Deck Protobuf >
+		bucket := tx.Bucket([]byte(deckid))
+		// Setup a return which will iterate through each Key, Value in Bucket and append to map
+		return bucket.ForEach(func(k []byte, v []byte) error {
+			if n >= page*limit-limit && n < page * limit {
 				// Grab the <Deck Protobuf> and Parse it into a Deck Object
 				c := protobuf.ParseCard(v)
-				j := FormatCardResponse(c,true)
+				j := FormatCardResponse(c, true)
 				// Create an entry in the res map where key is string(<Deck ID>)
 				// and the value is set to the Deck Object
-				delete(j,"type")
+				delete(j, "type")
 				res = append(res, j)
 				// Return nil because there were no errors iterating through the bucket
-				return nil
-			})
-			// Return nil after apending to map
+			}
+			n++
 			return nil
 		})
-	}
+		// Return nil after apending to map
+		return nil
+	})
 	j,err := json.Marshal(res)
 	if err != nil{
 		return j, err
 	}
 	// Will return nil if bucket is not found
 	return j, nil
-
 }
 
 func FormatCardResponse( c *protobuf.CardTransfer, send bool) map[string]interface{}{
@@ -270,7 +271,6 @@ func GetAllDecks() []string{
 	defer Close()
 	decks := []string{}
 	db.View(func(tx *bolt.Tx) error{
-		log.Print(tx)
 		b := tx.Bucket([]byte("Decks"))
 		b.ForEach( func(k ,v []byte) error{
 			deckid := string(k)
@@ -280,7 +280,6 @@ func GetAllDecks() []string{
 
 		return nil
 	})
-	log.Print(decks)
 	return decks
 }
 

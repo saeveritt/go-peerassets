@@ -67,7 +67,8 @@ func GetCards(deckid string) []*protobuf.CardTransfer{
 	}
 	rawtxs := RawTransactions(txs)
 	cards := []*protobuf.CardTransfer{}
-
+	n := 0
+	fmt.Printf("\nDeck: %v\n",deckid)
 	for _,rawtx := range rawtxs{
 		data := GetMetaData(rawtx)
 		if len(data) < 1{continue}
@@ -88,6 +89,8 @@ func GetCards(deckid string) []*protobuf.CardTransfer{
 				card.CardIndex = []int32{int32(i)}
 			}
 		}
+		n++
+		fmt.Printf("\r%d Cards",n)
 		cards = append(cards,card)
 
 	}
