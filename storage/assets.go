@@ -2,103 +2,163 @@ package storage
 
 import (
 	"fmt"
-	"github.com/boltdb/bolt"
+	"github.com/saeveritt/go-peerassets/config"
 	"github.com/saeveritt/go-peerassets/protobuf"
 	"github.com/saeveritt/go-peerassets/utils"
 	ppcd "github.com/saeveritt/go-peercoind"
 	"log"
-	"strconv"
 )
 
-var(
-	//add to subscribed map the list of deck id's you wish to import
-	subscribed = map[string]bool{
-		"*": true,
-	}
-)
 
-func PutRootAsset(cards bool){
+func PutRootAsset(){
 	// Loads all valid assets registered to main p2th address registry
 	txs := utils.RootTransactions()
 	rawtxs := utils.RawTransactions(txs)
 	i := 0 // Deck counter
 	for _, rawtx := range rawtxs{
-		if _,ok := subscribed["*"];!ok{continue}
-		if _,ok := subscribed[rawtx.Txid];!ok || subscribed["*"] {
-			sender := utils.GetSender(rawtx)
-			receiver := utils.GetReceiver(rawtx)
-			opReturn := utils.GetMetaData(rawtx)
-			deck := utils.DeckParse(opReturn)
-			err := utils.ValidateDeckBasic(receiver, deck)
-			if err != nil {
-				//log.Print(err)
-				continue
-			}
-			proto, err := deck.XXX_Marshal(nil, false)
-			must(err)
-			if sender != "coinbase/coinstake" && len(proto) != 0 {
-				PutDeck(sender, rawtx)
-				PutDeckProto(proto, rawtx)
-				PutDeckCreator(sender, rawtx, proto)
-				if cards {utils.ImportDeck(rawtx.Txid)}
-				i++
-				fmt.Printf("\r%d Decks Validated", i)
-			}
+		height := utils.GetBlockHeight(rawtx.Txid)
+		sender := utils.GetSender(rawtx)
+		receiver := utils.GetReceiver(rawtx)
+		opReturn := utils.GetMetaData(rawtx)
+		deck,err := utils.DeckParse(opReturn)
+		if err != nil{
+			continue
+		}
+		err = utils.ValidateDeckBasic(receiver, deck)
+		if err != nil {
+			continue
+		}
+		proto, err := deck.XXX_Marshal(nil, false)
+		if err != nil{
+			continue
+		}
+		if sender != "coinbase/coinstake"{
+			PutDeck(sender, rawtx)
+			PutDeckProto(proto, rawtx)
+			PutDeckCreator(sender, rawtx, proto)
+			PutDeckHeight(height, rawtx)
+			i++
+			fmt.Printf("\r%d Decks Validated", i)
 		}
 	}
 }
 
+
+func ImportSubscribed() error{
+	data, err := config.Open()
+	if err != nil{
+		log.Fatal(err)
+	}
+	if data.Subscribed.All {
+		decks := GetAllDecks()
+		if len(decks)  > 0 {
+			utils.ImportDecks(decks)
+		}
+	}else{
+		utils.ImportDecks(data.Subscribed.Decks)
+		}
+		lastScanned := GetScanHeight()
+		if lastScanned != 0 {
+			log.Printf("Rescanning Blockchain from Height: %v", lastScanned)
+			current := utils.RescanBlockchain(lastScanned)
+			log.Printf("Rescanned to Height: %v", current)
+		}else{
+			lowest := GetLowestBlock()
+			log.Printf("Rescanning Blockchain from Height: %v", lowest)
+			current := utils.RescanBlockchain(lowest)
+			log.Printf("Rescanned to Height: %v", current)
+
+		}
+	return nil
+}
+
+func ImportSubscribedCards(){
+	data, err := config.Open()
+	if err != nil{
+		log.Fatal(err)
+	}
+	if data.Subscribed.All {
+		decks := GetAllDecks()
+		if len(decks) > 0 {
+			PutCards(decks)
+		}
+
+	}else {
+		decks := data.Subscribed.Decks
+		if len(decks) > 0 {
+			PutCards(decks)
+		}
+	}
+}
+
+func PutScanHeight(height uint64){
+	bHeight := utils.Uint64Byte(height)
+	Put("DecksHeight","LastScanned",bHeight)
+}
+
+func GetScanHeight() uint64{
+	scanHeight := Get("DecksHeight","LastScanned")
+	if scanHeight == nil{
+		return uint64(0)
+	}
+	return utils.ByteUint64(scanHeight)
+}
+
+
 func PutDeck(sender string, rawtx ppcd.RawTransaction){
 	//Import deck information into local db
-	utils.ImportDeck(rawtx.Txid)
 	// Bucket: Decks, Key: DeckSpawn ID, Value: Deck Owner
 	Put("Decks",rawtx.Txid,[]byte(sender))
 }
+func PutDeckHeight(height uint64, rawtx ppcd.RawTransaction){
+	//Import deck information into local db
+	bHeight := utils.Uint64Byte(height)
+	// Bucket: Decks, Key: DeckSpawn ID, Value: Deck Owner
+	Put("DecksHeight",rawtx.Txid,bHeight)
+}
+
 func PutDeckProto(proto []byte, rawtx ppcd.RawTransaction){
 	//Import deck information into local db
-	utils.ImportDeck(rawtx.Txid)
 	// Bucket: Decks, Key: DeckSpawn ID, Value: Deck Owner
-	Put("DecksProto",rawtx.Txid, proto)
+	Put( "DecksProto",rawtx.Txid, proto)
 }
 func PutDeckCreator(sender string, rawtx ppcd.RawTransaction,proto []byte){
 	// Bucket: <sender address>, Key: "Deck-" + <Deckspawn ID>, Value: <proto>
-	Put(sender,"Deck-" + rawtx.Txid,proto)
+	deck := protobuf.AddressCardKey{Type: 0x01, DeckId: rawtx.Txid}
+	deckKey,_ := deck.XXX_Marshal(nil,false)
+	PutByte(sender,deckKey,proto)
 }
 
 
-func PutAllCards(){
-	db, _:=Connect()
-	db.View(func(tx *bolt.Tx) error{
-		tx.Bucket([]byte("Decks")).ForEach( func(k ,v []byte) error{
-			deckid := string(k)
-			log.Print("Searching Buckets" + deckid)
-			log.Print(deckid)
-			utils.ImportDeck(deckid)
-			PutCards(deckid)
-			return nil
-		} )
-		return nil
-		})
-	db.Close()
-}
-
-func PutCards(deckid string){
+func PutCards(deckids []string){
 	// Loads all valid assets registered to main p2th address registry
-	cards := utils.GetCards(deckid)
-	for _, card := range cards{
-		log.Print(card)
-		ProcessDeckCardKeys(card)
+	for _, deckid := range deckids {
+		cards := utils.GetCards(deckid)
+		for _, card := range cards {
+			ProcessDeckCardKeys(card)
+		}
 	}
 }
 
 func ProcessDeckCardKeys(card *protobuf.CardTransfer){
-	height:= strconv.Itoa( int(card.BlockHeight[0]) )
-	txIndex := strconv.Itoa( int(card.TxIndex[0]) )
-	cardIndex := strconv.Itoa( int(card.CardIndex[0]) )
-	baseKey := card.DeckId + "-" + height + "-" + txIndex + "-" + cardIndex
-	sendKey := "Card-Send-"+ baseKey
-	receiveKey := "Card-Receive-" + baseKey
+	baseKey := protobuf.AddressCardKey{
+		Type:                 0x02,
+		CardType: 			  0x01,
+		DeckId:               card.DeckId,
+		BlockHeight:          card.BlockHeight[0],
+		TxIndex:              card.TxIndex[0],
+		CardIndex:            card.CardIndex[0],
+	}
+	sendKey,_ := baseKey.XXX_Marshal(nil,false)
+	baseKey.CardType = 0x02
+	receiveKey,_ := baseKey.XXX_Marshal(nil,false)
+
+	baseKey.Type = 0x00
+	baseKey.CardType = 0x00
+	baseKey.DeckId = ""
+	deckKey,_ := baseKey.XXX_Marshal(nil,false)
 	proto,_ := card.XXX_Marshal(nil,false)
-	Put(card.Sender,sendKey, proto)
-	Put(card.Receiver[0],receiveKey, proto)
+	PutByte(card.Sender,sendKey, proto)
+	PutByte(card.Receiver[0],receiveKey, proto)
+	PutByte(card.DeckId, deckKey,proto)
 }

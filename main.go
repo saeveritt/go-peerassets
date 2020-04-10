@@ -16,19 +16,21 @@ func init(){
 	startFlag := flag.Bool("server",false,"Start server")
 	cardFlag := flag.Bool("cards",false,"Load All Cards")
 	flag.Parse()
+
 	if *loadFlag {
 		utils.ImportRootP2TH()
-		storage.PutRootAsset(false)
+		storage.PutRootAsset()
+		storage.ImportSubscribed()
 	}
 	if *cardFlag{
-		storage.PutAllCards()
+		storage.ImportSubscribedCards()
 	}
 	StartServer(*startFlag, *portFlag)
 
 }
 
 func main() {
-	//utils.GetCards("d460651e1d9147770ec9d4c254bcc68ff5d203a86b97c09d00955fb3f714cab3")
+	storage.GetAllDecks()
 }
 
 func StartServer(server bool,port string){

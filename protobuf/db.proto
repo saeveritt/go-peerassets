@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+// Go-PeerAssets Database Keys Proto
+// written by saeveritt (github.com/saeveritt)
+
+message DeckCardKey{
+int32 block_height;
+int63 tx_index;
+int32 card_index;
+}
+
+
+
+// Meta-data message for Address Key
+message AddressCardKey {
+
+    // Types
+    enum TYPE {
+    NONE = 0x00;
+    DECK   = 0x01; // Deck Created
+    CARD  = 0x02; // Card Sent
+    }
+
+    // Types for CardTransfer
+    enum CARD_TYPE{
+    EMPTY = 0x00;
+    SEND = 0x01;
+    RECEIVE = 0x02;
+    CREATE = 0x03;
+    }
+
+    int32 type = 1;
+
+    int32 card_type = 2;
+
+    // Name for the registered asset
+    string deck_id = 3;
+
+    // Block Height
+    int32 block_height = 4;
+
+    // Transaction Index
+    int64 tx_index = 5;
+
+    // Card Index
+    int32 card_index = 6;
+
+}

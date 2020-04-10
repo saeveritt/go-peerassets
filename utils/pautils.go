@@ -9,7 +9,6 @@ import (
 	"github.com/saeveritt/go-peerassets/protobuf"
 	"github.com/saeveritt/go-peerassets/rpc"
 	ppcd "github.com/saeveritt/go-peercoind"
-	"log"
 	"strings"
 )
 var cli *ppcd.Bitcoind
@@ -21,7 +20,6 @@ func init(){
 
 func must(err error){
 	if err != nil{
-		log.Print(err)
 	}
 }
 
@@ -35,23 +33,27 @@ func ImportRootP2TH() {
 	must(cli.ImportPrivKey(net.WIF,net.Address,false))
 }
 
-func ImportDeck(deckid string){
-	_, err := cli.GetAddressesByAccount(deckid)
-	must(err)
-	wif := ToWIF(deckid)
-	// Imports deck and sets the Account name to the deckid (txid)
-	must(cli.ImportPrivKey(wif,deckid,false))
-	RescanBlockchain(deckid)
+func ImportDecks(deckids []string) {
+	accounts, _ := cli.ListAccounts(0)
+	for _, deckid := range deckids {
+		if _,ok := accounts[deckid]; !ok {
+			wif := ToWIF(deckid)
+			// Imports deck and sets the Account name to the deckid (txid)
+			must(cli.ImportPrivKey(wif, deckid, false))
+		}
+	}
 }
-func RescanBlockchain(txid string) {
-	height := GetBlockHeight(txid)
-	log.Print("Scanning Transactions For: " + txid)
-	Scan(height)
+func RescanBlockchain(height uint64) uint64{
+	// Will Scan Blockchain from specified height and return current height
+	err := cli.RescanBlockchain(height)
+	must(err)
+	current, err := cli.GetBlockCount()
+	return current
 }
 
 func GetCards(deckid string) []*protobuf.CardTransfer{
 	resp, err := cli.ListTransactions(deckid,99999999,0)
-	deck := GetDeckInfo(deckid)
+	deck,err := GetDeckInfo(deckid)
 	txs := make([]string,len(resp))
 	txIndex := make(map[string]int64)
 	txBlock := make(map[string]int32)
@@ -74,16 +76,17 @@ func GetCards(deckid string) []*protobuf.CardTransfer{
 		if card.NumberOfDecimals != deck.NumberOfDecimals {continue}
 		txSender[rawtx.Txid] = GetSender(rawtx)
 		for i, amount := range card.Amount{
-			card.Amount = []int64{amount}
-			card.Sender = txSender[rawtx.Txid]
-			receiver := rawtx.Vout[2+i].ScriptPubKey.Addresses[0]
-			card.DeckId = deckid
-			card.CardId = rawtx.Txid
-			card.Receiver = []string{receiver}
-			card.BlockHeight = []int32{txBlock[rawtx.Txid]}
-			card.TxIndex = []int64{txIndex[rawtx.Txid]}
-			card.CardIndex = []int32{int32(i)}
-			log.Print(card)
+			if len(rawtx.Vout) > 2+i {
+				card.Amount = []int64{amount}
+				card.Sender = txSender[rawtx.Txid]
+				receiver := rawtx.Vout[2+i].ScriptPubKey.Addresses[0]
+				card.DeckId = deckid
+				card.CardId = rawtx.Txid
+				card.Receiver = []string{receiver}
+				card.BlockHeight = []int32{txBlock[rawtx.Txid]}
+				card.TxIndex = []int64{txIndex[rawtx.Txid]}
+				card.CardIndex = []int32{int32(i)}
+			}
 		}
 		cards = append(cards,card)
 
@@ -95,13 +98,6 @@ func GetCards(deckid string) []*protobuf.CardTransfer{
 	return cards
 
 
-}
-
-
-func Scan(height uint64){
-	log.Print("Rescanning Blockchain..")
-	err := cli.RescanBlockchain(height)
-	must(err)
 }
 
 func GetBlockHeight(txid string) uint64{
@@ -165,20 +161,19 @@ func GetMetaData(rawTx ppcd.RawTransaction) string{
 	// Retrieves OP_RETURN Data from raw transaction
 	if len(rawTx.Vout) < 1 {return ""}
 	asm := rawTx.Vout[1].ScriptPubKey.Asm
-	// Seperates into array of strings by spaces
+	// Separates into array of strings by spaces
 	s := strings.Fields(asm)
 	if s[0] != "OP_RETURN"{return ""}
 	if len(s) <= 1{return ""}
 	return s[1]
 }
 
-func DeckParse(opReturn string) (Deck *protobuf.DeckSpawn){
+func DeckParse(opReturn string) (*protobuf.DeckSpawn, error){
 	// convert hex string to bytes
 	hexBytes, err := hex.DecodeString(opReturn)
-	must(err)
 	// Returns Unmarshalled bytes as Deck
-	Deck = protobuf.ParseDeck(hexBytes)
-	return
+	Deck := protobuf.ParseDeck(hexBytes)
+	return Deck, err
 }
 
 func CardParse(opReturn string) (Card *protobuf.CardTransfer){
@@ -203,17 +198,27 @@ func ValidateDeckBasic(receiver string, deck *protobuf.DeckSpawn) error{
 	return nil
 }
 
-func GetDeckInfo(deckid string) *protobuf.DeckSpawn{
+func GetDeckInfo(deckid string) (*protobuf.DeckSpawn,error){
 	rawtx,err := cli.GetRawTransaction(deckid,true)
 	must(err)
 	meta := GetMetaData(rawtx)
-	deck := DeckParse(meta)
-	return deck
+	deck,err := DeckParse(meta)
+	return deck, err
 
 
 
 }
 
+func Uint64Byte( value uint64) (b []byte){
+	b = make([]byte,8)
+	binary.BigEndian.PutUint64(b, value)
+	return
+}
+
+func ByteUint64( value []byte) (val uint64){
+	val = binary.BigEndian.Uint64(value)
+	return
+}
 //func ValidateCardBasic(deckid string, rawtx ppcd.RawTransaction, card *protobuf.CardTransfer){
 //	sender:= GetSender(rawtx)
 //	receiver := GetReceiver(rawtx)
@@ -233,15 +238,3 @@ func GetDeckInfo(deckid string) *protobuf.DeckSpawn{
 //	}
 //
 //}
-
-
-func uint64Byte( value uint64) (b []byte){
-	b = make([]byte,8)
-	binary.BigEndian.PutUint64(b, value)
-	return
-}
-
-func byteUint64( value []byte) (val uint64){
-	val = binary.BigEndian.Uint64(value)
-	return
-}

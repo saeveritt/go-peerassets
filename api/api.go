@@ -29,24 +29,31 @@ func getTransactions( w http.ResponseWriter, r *http.Request){
 	var j []byte
 	// Assign variables to the values passed in the GET request
 	var address = r.URL.Query().Get("address")
+	var deck = r.URL.Query().Get("deck")
 	var txType = r.URL.Query().Get("type")
 	var limit = r.URL.Query().Get("limit")
 	var page = r.URL.Query().Get("page")
 	l,p,_ := pageLimit( limit, page)
 	// If address is not empty
-	if len(address) == 34 && txType != ""{
+	if deck != "" && len(deck) == 64{
+		j,_ = storage.GetDeckTransactions(deck,l,p)
+		w.Write(j)
+		return
+	} else if len(address) == 34 && txType != ""{
 		// Check for address in storage. Each address has its own dedicated bucket.
 		j, _ = storage.GetAddress(address,txType,l,p)
 		// if there was an error writing the JSON byte array,it will send empty array
 		// else it sends a JSON byte array Response with the results
 		//w.WriteHeader(200)
 		w.Write(j)
+		return
 	}else{
 		// if address argument is empty, return empty byte array
 		apiError["error"] = "Invalid arguments"
 		j, _ = json.Marshal(apiError)
 		//w.WriteHeader(400)
 		w.Write( j )
+		return
 	}
 }
 
