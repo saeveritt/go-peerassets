@@ -30,7 +30,7 @@ func init(){
 }
 
 func main() {
-	storage.GetAllDecks()
+	storage.CalculateMulti("d460651e1d9147770ec9d4c254bcc68ff5d203a86b97c09d00955fb3f714cab3")
 }
 
 func StartServer(server bool,port string){

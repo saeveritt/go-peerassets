@@ -21,3 +21,12 @@ func ParseCard(buf []byte) *CardTransfer{
 	}
 	return Card
 }
+
+func ParseKey(buf []byte) *AddressCardKey{
+	Key := &AddressCardKey{}
+	err := Key.XXX_Unmarshal(buf)
+	if err != nil{
+		log.Print(err)
+	}
+	return Key
+}

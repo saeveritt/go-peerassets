@@ -19,8 +19,25 @@ func AgaveRouter() *mux.Router {
 	// Define the function handlers per route
 	api.HandleFunc("/assets", getAssets).Methods(http.MethodGet)
 	api.HandleFunc("/transactions",getTransactions).Methods(http.MethodGet)
+	api.HandleFunc("/balances", getBalances).Methods(http.MethodGet)
 	return r
 }
+
+func getBalances( w http.ResponseWriter, r *http.Request ){
+	logClient(r)
+	w.Header().Set( "Content-Type","application/json")
+
+	var j []byte
+
+	address := r.URL.Query().Get("address")
+	//deck := r.URL.Query().Get("deck")
+
+	if len(address) == 34{
+		j, _ = json.Marshal( storage.GetUserBalances(address) )
+		w.Write(j)
+	}
+}
+
 
 func getTransactions( w http.ResponseWriter, r *http.Request){
 	logClient(r)

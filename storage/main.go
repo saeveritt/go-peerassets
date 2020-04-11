@@ -269,17 +269,22 @@ func GetLowestBlock() uint64{
 func GetAllDecks() []string{
 	Connect()
 	defer Close()
-	decks := []string{}
-	db.View(func(tx *bolt.Tx) error{
+	var decks []string
+	if err := db.View(func(tx *bolt.Tx) error{
 		b := tx.Bucket([]byte("Decks"))
-		b.ForEach( func(k ,v []byte) error{
+		if err := b.ForEach( func(k ,v []byte) error{
 			deckid := string(k)
 			decks = append(decks, deckid)
+			log.Print(deckid)
 			return nil
-		})
+		}); err != nil{
+			return err
+		}
 
 		return nil
-	})
+	}); err != nil{
+		return []string{""}
+	}
 	return decks
 }
 

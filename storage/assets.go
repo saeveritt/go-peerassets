@@ -1,7 +1,9 @@
 package storage
 
 import (
+	"bytes"
 	"fmt"
+	"github.com/boltdb/bolt"
 	"github.com/saeveritt/go-peerassets/config"
 	"github.com/saeveritt/go-peerassets/protobuf"
 	"github.com/saeveritt/go-peerassets/utils"
@@ -81,12 +83,15 @@ func ImportSubscribedCards(){
 		decks := GetAllDecks()
 		if len(decks) > 0 {
 			PutCards(decks)
+			PutBalances(decks)
+
 		}
 
 	}else {
 		decks := data.Subscribed.Decks
 		if len(decks) > 0 {
 			PutCards(decks)
+			PutBalances(decks)
 		}
 	}
 }
@@ -132,10 +137,25 @@ func PutDeckCreator(sender string, rawtx ppcd.RawTransaction,proto []byte){
 
 func PutCards(deckids []string){
 	// Loads all valid assets registered to main p2th address registry
+	accounts := make(map[string]map[string]bool)
 	for _, deckid := range deckids {
 		cards := utils.GetCards(deckid)
 		for _, card := range cards {
 			ProcessDeckCardKeys(card)
+			if accounts[card.Receiver[0]] == nil{
+				accounts[card.Receiver[0]] = make(map[string]bool)
+			}
+			accounts[card.Receiver[0]][deckid] = true
+		}
+	}
+	for address, deckids := range accounts{
+		for deckid, _ := range deckids {
+			baseKey := protobuf.AddressCardKey{
+				Type: 0x01,
+				DeckId: deckid,
+			}
+			accountKey,_ := baseKey.XXX_Marshal(nil,false)
+			PutByte(address,accountKey,[]byte("true"))
 		}
 	}
 }
@@ -161,4 +181,34 @@ func ProcessDeckCardKeys(card *protobuf.CardTransfer){
 	PutByte(card.Sender,sendKey, proto)
 	PutByte(card.Receiver[0],receiveKey, proto)
 	PutByte(card.DeckId, deckKey,proto)
+}
+
+
+func GetUserBalances(address string) map[string]int64{
+	Connect()
+	defer Close()
+	balances := make( map[string]int64 )
+	deckType := protobuf.AddressCardKey{Type: 0x01}
+	log.Print(deckType)
+	db.View( func(tx *bolt.Tx) error{
+		b := tx.Bucket([]byte(address))
+		c := b.Cursor()
+		prefix,_ := deckType.XXX_Marshal(nil,false)
+		for k,_ := c.Seek(prefix); bytes.HasPrefix(k, prefix);k,_ = c.Next(){
+			key := protobuf.ParseKey(k)
+			balances[key.DeckId] = 0
+		}
+		for k, _ := range balances {
+			b = tx.Bucket([]byte("Balance-" + k))
+			if b != nil {
+				byteAmount := b.Get([]byte( address ))
+				if byteAmount != nil {
+					amount := utils.ByteUint64(byteAmount)
+					balances[k] = int64(amount)
+				}
+			}
+		}
+	return nil
+	})
+	return balances
 }
