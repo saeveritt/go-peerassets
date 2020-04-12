@@ -17,7 +17,7 @@ RUN go mod download
 
 RUN go build -o main .
 
-CMD ["/app/main","-load"]
+CMD ["/app/main"]
 ENV LISTEN_PORT 8089
 ENV LISTEN_PORT 9904
 EXPOSE 8089 9904 9903 9902 9901
