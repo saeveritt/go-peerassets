@@ -4,7 +4,7 @@ import (
 	"log"
 )
 
-func ParseDeck(buf []byte) *DeckSpawn{
+func ParseDeck(buf []byte) *DeckSpawn {
 	Deck := &DeckSpawn{}
 	err := Deck.XXX_Unmarshal(buf)
 	if err != nil{
@@ -13,7 +13,7 @@ func ParseDeck(buf []byte) *DeckSpawn{
 	return Deck
 }
 
-func ParseCard(buf []byte) *CardTransfer{
+func ParseCard(buf []byte) *CardTransfer {
 	Card := &CardTransfer{}
 	err := Card.XXX_Unmarshal(buf)
 	if err != nil{
@@ -22,7 +22,7 @@ func ParseCard(buf []byte) *CardTransfer{
 	return Card
 }
 
-func ParseKey(buf []byte) *AddressCardKey{
+func ParseKey(buf []byte) *AddressCardKey {
 	Key := &AddressCardKey{}
 	err := Key.XXX_Unmarshal(buf)
 	if err != nil{

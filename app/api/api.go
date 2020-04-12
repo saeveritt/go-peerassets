@@ -3,7 +3,7 @@ package api
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
-	"github.com/saeveritt/go-peerassets/storage"
+	"github.com/saeveritt/go-peerassets/app/storage"
 	"log"
 	"net/http"
 	"strconv"
@@ -18,7 +18,7 @@ func AgaveRouter() *mux.Router {
 	api := r.PathPrefix("/v1").Subrouter()
 	// Define the function handlers per route
 	api.HandleFunc("/assets", getAssets).Methods(http.MethodGet)
-	api.HandleFunc("/transactions",getTransactions).Methods(http.MethodGet)
+	api.HandleFunc("/transactions", getTransactions).Methods(http.MethodGet)
 	api.HandleFunc("/balances", getBalances).Methods(http.MethodGet)
 	return r
 }

@@ -1,0 +1,35 @@
+version: '3.5'
+services:
+  peercoind:
+    build: ./peercoind
+    restart: always
+    ports:
+      "19904:19904"
+    environment:
+       - RPC_USER=pothos
+       - RPC_PASSWORD=pothos
+    volumes:
+      type: bind
+      source: /opt/go-perassets/peercoin/
+      target: /data
+    command:
+       - testnet=1
+       - rpc_user=pothos
+       - rpc_password=pothos
+       - txindex=1
+       - nominting
+       - rpcallowip=*
+       - rpcport=9904
+       - walletnotify='/usr/local/bin/transaction.sh %s'
+  go-peerassets:
+    restart: always
+    build: .
+    ports:
+      "8089:8089"
+    depends_on:
+      - peercoind
+    environment:
+     - RPC_HOST=peercoind
+     - RPC_PORT=9904
+     - RPC_USERNAME=pothos
+     - RPC_PASSWORD=pothos

@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/boltdb/bolt"
-	"github.com/saeveritt/go-peerassets/protobuf"
-	"github.com/saeveritt/go-peerassets/utils"
+	"github.com/saeveritt/go-peerassets/app/protobuf"
+	"github.com/saeveritt/go-peerassets/app/utils"
 	"os"
 	"time"
 

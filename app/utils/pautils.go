@@ -5,9 +5,9 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/saeveritt/go-peerassets/networks"
-	"github.com/saeveritt/go-peerassets/protobuf"
-	"github.com/saeveritt/go-peerassets/rpc"
+	"github.com/saeveritt/go-peerassets/app/networks"
+	"github.com/saeveritt/go-peerassets/app/protobuf"
+	"github.com/saeveritt/go-peerassets/app/rpc"
 	ppcd "github.com/saeveritt/go-peercoind"
 	"strings"
 )
@@ -30,7 +30,7 @@ func ImportRootP2TH() {
 		fmt.Println("P2TH previously imported. Scanning for assets...")
 		return}
 	// This will load the P2TH Main Registry with Account Name set to <Address>
-	must(cli.ImportPrivKey(net.WIF,net.Address,false))
+	must(cli.ImportPrivKey(net.WIF, net.Address,false))
 }
 
 func ImportDecks(deckids []string) {
@@ -51,7 +51,7 @@ func RescanBlockchain(height uint64) uint64{
 	return current
 }
 
-func GetCards(deckid string) []*protobuf.CardTransfer{
+func GetCards(deckid string) []*protobuf.CardTransfer {
 	resp, err := cli.ListTransactions(deckid,99999999,0)
 	deck,err := GetDeckInfo(deckid)
 	txs := make([]string,len(resp))

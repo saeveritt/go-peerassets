@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/saeveritt/go-peerassets/api"
-	"github.com/saeveritt/go-peerassets/storage"
-	"github.com/saeveritt/go-peerassets/utils"
+	"github.com/saeveritt/go-peerassets/app/api"
+	"github.com/saeveritt/go-peerassets/app/storage"
+	"github.com/saeveritt/go-peerassets/app/utils"
 	"log"
 	"net/http"
 )

@@ -3,11 +3,11 @@ package utils
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"github.com/saeveritt/go-peerassets/networks"
+	"github.com/saeveritt/go-peerassets/app/networks"
 	"log"
 )
 
-func GetParams() *networks.NetParameters{
+func GetParams() *networks.NetParameters {
 
 	return networks.Default()
 }

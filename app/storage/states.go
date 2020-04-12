@@ -2,8 +2,8 @@ package storage
 
 import (
 	"github.com/boltdb/bolt"
-	"github.com/saeveritt/go-peerassets/protobuf"
-	"github.com/saeveritt/go-peerassets/utils"
+	"github.com/saeveritt/go-peerassets/app/protobuf"
+	"github.com/saeveritt/go-peerassets/app/utils"
 	"log"
 	"sort"
 )
@@ -54,7 +54,7 @@ func PutBalances(deckids []string){
 	}
 }
 
-func GetCards(deckid string) []Card{
+func GetCards(deckid string) []Card {
 	Connect()
 	defer Close()
 	var Cards []Card
@@ -64,7 +64,7 @@ func GetCards(deckid string) []Card{
 		if b == nil { return nil}
 		if err := b.ForEach( func(k []byte,v []byte) error{
 			c := protobuf.ParseCard(v)
-			Cards = append(Cards,Card{
+			Cards = append(Cards, Card{
 				c.Sender,
 				c.Receiver[0],
 				c.BlockHeight[0],
@@ -84,7 +84,7 @@ func GetCards(deckid string) []Card{
 	return result
 }
 
-func SortCards(Cards []Card) []Card{
+func SortCards(Cards []Card) []Card {
 	sort.Slice(Cards, func(p, q int) bool {
 		if Cards[p].height == Cards[q].height{
 			if Cards[p].tx_index == Cards[q].tx_index{

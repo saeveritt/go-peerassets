@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/boltdb/bolt"
-	"github.com/saeveritt/go-peerassets/config"
-	"github.com/saeveritt/go-peerassets/protobuf"
-	"github.com/saeveritt/go-peerassets/utils"
+	"github.com/saeveritt/go-peerassets/app/config"
+	"github.com/saeveritt/go-peerassets/app/protobuf"
+	"github.com/saeveritt/go-peerassets/app/utils"
 	ppcd "github.com/saeveritt/go-peercoind"
 	"log"
 )

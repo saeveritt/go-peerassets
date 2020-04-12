@@ -1,6 +1,6 @@
 package networks
 
-func Default() *NetParameters{
+func Default() *NetParameters {
 	// Set Default Network here
 	// ex. "Peercoin-Testnet", "Peercoin"
 	net := "Peercoin-Test"

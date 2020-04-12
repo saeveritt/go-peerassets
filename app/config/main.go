@@ -8,7 +8,7 @@ import (
 )
 
 type Config struct{
-	Subscribed	Subscribed 	`json:"subscribed"`
+	Subscribed Subscribed `json:"subscribed"`
 }
 
 type Subscribed struct{
