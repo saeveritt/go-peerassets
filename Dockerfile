@@ -1,25 +1,23 @@
 FROM golang:1.14
 
 
-ENV GO111MODULE=on \
-    CGO_ENABLED=0 \
-    GOOS=linux  \
+ENV GOOS=linux  \
     GOARCH=amd64 \
+    APP_ENV=docker
 
-WORKDIR /build
+COPY docker-entrypoint.sh  /usr/local/bin/
+RUN chmod +x  /usr/local/bin/docker-entrypoint.sh
+ENTRYPOINT ["docker-entrypoint.sh"]
 
-COPY app/go.mod .
-COPY app/go.sum .
+COPY ./app /app
+
+WORKDIR /app
+
 RUN go mod download
-
-COPY . .
 
 RUN go build -o main .
 
-WORKDIR /dist
-
-RUN cp /build/main
-
-EXPOSE 8089
-
-CMD["/dist/main"]
+CMD ["/app/main","-load"]
+ENV LISTEN_PORT 8089
+ENV LISTEN_PORT 9904
+EXPOSE 8089 9904 9903 9902 9901

@@ -1,4 +1,4 @@
-module github.com/saeveritt/go-peerassets
+module github.com/saeveritt/go-peerassets/app
 
 go 1.14
 

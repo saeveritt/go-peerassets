@@ -9,6 +9,7 @@ import (
 
 type Config struct{
 	Subscribed Subscribed `json:"subscribed"`
+	Environment Environment
 }
 
 type Subscribed struct{
@@ -16,8 +17,26 @@ type Subscribed struct{
 	Decks 		[]string	`json:"decks"`
 }
 
+type Environment struct{
+	rpcUsername string
+	rpcPassword string
+	rpcHost	string
+	rpcPort	string
+
+}
+
+
 func Open() (Config, error){
 	var config Config
+
+	env := Environment{
+		os.Getenv("RPC_USERNAME"),
+		os.Getenv("RPC_PASSWORD"),
+		os.Getenv("RPC_HOST"),
+		os.Getenv("RPC_PORT"),
+	}
+
+	config.Environment = env
 	pwd, _ := os.Getwd()
 	file, err := ioutil.ReadFile(pwd+"/config.json")
 	_ = json.Unmarshal(file, &config)

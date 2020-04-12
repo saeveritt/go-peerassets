@@ -1,6 +1,12 @@
 package networks
 
+import "github.com/saeveritt/go-peerassets/app/config"
+
+var conf config.Config
+
 func Default() *NetParameters {
+
+	conf,_ = config.Open()
 	// Set Default Network here
 	// ex. "Peercoin-Testnet", "Peercoin"
 	net := "Peercoin-Test"
@@ -20,6 +26,7 @@ type NetParameters struct{
 	User 			string
 	Password		string
 }
+
 
 func Peercoin() *NetParameters {
 	p := NetParameters{}
@@ -44,10 +51,10 @@ func PeercoinTestnet() *NetParameters {
 	p.WIF = "cTJVuFKuupqVjaQCFLtsJfG8NyEyHZ3vjCdistzitsD2ZapvwYZH"
 	p.WIFPrefix = "ef" //0xef
 	p.Fee = 0.001
-	p.Host = "localhost"
+	p.Host = "peercoind"
 	p.Port = 9904
-	p.User = "pothos"
-	p.Password = "pothos"
+	p.User = "peercoind"
+	p.Password = "peercoindrpc"
 	return &p
 }
 

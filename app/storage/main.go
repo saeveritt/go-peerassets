@@ -32,8 +32,9 @@ func Connect(){
 	// functions in this file can use it
 	if !open {
 		path, _ := os.Getwd()
+		log.Print("CWD: " + path)
 		conf := &bolt.Options{Timeout: 1 * time.Second}
-		db, err = bolt.Open(path+"/storage/assets.db", 0600, conf)
+		db, err = bolt.Open(path + "/storage/assets.db", 0600, conf)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -254,7 +255,9 @@ func GetLowestBlock() uint64{
 	var lowest uint64
 	lowest = 18446744073709551615
 	db.View(  func(tx *bolt.Tx) error{
-		tx.Bucket([]byte("DecksHeight")).ForEach( func(k []byte,v []byte) error{
+		b:= tx.Bucket([]byte("DecksHeight"))
+		if b == nil{return nil}
+		b.ForEach( func(k []byte,v []byte) error{
 			height := utils.ByteUint64(v)
 			if height < lowest{
 				lowest = height
@@ -270,8 +273,9 @@ func GetAllDecks() []string{
 	Connect()
 	defer Close()
 	var decks []string
-	if err := db.View(func(tx *bolt.Tx) error{
+	if err := db.Update(func(tx *bolt.Tx) error{
 		b := tx.Bucket([]byte("Decks"))
+		if b == nil{return nil}
 		if err := b.ForEach( func(k ,v []byte) error{
 			deckid := string(k)
 			decks = append(decks, deckid)

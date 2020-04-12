@@ -6,8 +6,8 @@ import (
 	"github.com/saeveritt/go-peerassets/app/api"
 	"github.com/saeveritt/go-peerassets/app/storage"
 	"github.com/saeveritt/go-peerassets/app/utils"
-	"log"
 	"net/http"
+	"log"
 )
 
 func init(){
@@ -30,7 +30,6 @@ func init(){
 }
 
 func main() {
-	storage.CalculateMulti("d460651e1d9147770ec9d4c254bcc68ff5d203a86b97c09d00955fb3f714cab3")
 }
 
 func StartServer(server bool,port string){
