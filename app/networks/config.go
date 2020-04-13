@@ -52,7 +52,7 @@ func PeercoinTestnet() *NetParameters {
 	p.WIFPrefix = "ef" //0xef
 	p.Fee = 0.001
 	p.Host = "peercoind"
-	p.Port = 9904
+	p.Port = 19904
 	p.User = "peercoind"
 	p.Password = "peercoindrpc"
 	return &p

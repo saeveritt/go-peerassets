@@ -11,7 +11,7 @@ COPY ./app/config/walletnotify.sh /usr/local/bin/walletnotify.sh
 RUN chmod +x  /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x  /usr/local/bin/walletnotify.sh
 
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+ENTRYPOINT ["docker-entrypoint.sh"]
 
 COPY ./app /app
 
