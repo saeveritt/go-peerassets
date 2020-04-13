@@ -3,7 +3,9 @@ package api
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
+	"github.com/saeveritt/go-peerassets/app/rpc"
 	"github.com/saeveritt/go-peerassets/app/storage"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
@@ -20,8 +22,37 @@ func AgaveRouter() *mux.Router {
 	api.HandleFunc("/assets", getAssets).Methods(http.MethodGet)
 	api.HandleFunc("/transactions", getTransactions).Methods(http.MethodGet)
 	api.HandleFunc("/balances", getBalances).Methods(http.MethodGet)
+	api.HandleFunc("/alert", walletNotify).Methods(http.MethodPost)
+	api.HandleFunc("/send", sendTransaction).Methods(http.MethodPost)
 	return r
 }
+
+func sendTransaction(w http.ResponseWriter, r *http.Request){
+	logClient(r)
+	rawtx,err:= ioutil.ReadAll( r.Body)
+	if err != nil{
+		return
+	}
+	_, err = strconv.ParseUint(string(rawtx), 16, 64)
+	if err != nil {
+		return
+	}
+	cli,_ := rpc.Connect("Peercoin-Testnet")
+	resp, err := cli.SendRawTransaction( string(rawtx) )
+	if err !=nil{
+		log.Print(err)
+	}
+	log.Print(resp)
+}
+
+
+func walletNotify(w http.ResponseWriter, r *http.Request){
+	logClient(r)
+	r.ParseForm()
+	txid := r.Form.Get("txid")
+	log.Printf("walletnotify: %v",txid)
+}
+
 
 func getBalances( w http.ResponseWriter, r *http.Request ){
 	logClient(r)

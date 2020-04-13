@@ -4,7 +4,6 @@ import (
 	"github.com/boltdb/bolt"
 	"github.com/saeveritt/go-peerassets/app/protobuf"
 	"github.com/saeveritt/go-peerassets/app/utils"
-	"log"
 	"sort"
 )
 type Card struct{
@@ -43,7 +42,6 @@ func PutBalances(deckids []string){
 		//deck, _ := utils.GetDeckInfo(deckid)
 		//if protobuf.DeckSpawn_MODE_name[deck.IssueMode] == "MULTI" {
 		balances = CalculateMulti(deckid)
-		log.Print(balances)
 		//}
 		if len(balances) > 0 {
 			for address, balance := range balances {

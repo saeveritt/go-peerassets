@@ -10,10 +10,9 @@ services:
        - RPC_PASSWORD=peercoindrpc
        - TESTNET=1
        - TXINDEX=1
+       - WALLETNOTIFY/usr/local/bin/walletnotify.sh %s
     volumes:
-      - type: bind
-        source: /opt/peercoin/
-        target: /data
+      - /opt/go-peerassets/peercoin/:/data
     command:
       -nominting
       -rpcallowip=0.0.0.0/0

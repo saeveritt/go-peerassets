@@ -32,7 +32,6 @@ func Connect(){
 	// functions in this file can use it
 	if !open {
 		path, _ := os.Getwd()
-		log.Print("CWD: " + path)
 		conf := &bolt.Options{Timeout: 1 * time.Second}
 		db, err = bolt.Open(path + "/storage/assets.db", 0600, conf)
 		if err != nil {
@@ -279,7 +278,6 @@ func GetAllDecks() []string{
 		if err := b.ForEach( func(k ,v []byte) error{
 			deckid := string(k)
 			decks = append(decks, deckid)
-			log.Print(deckid)
 			return nil
 		}); err != nil{
 			return err

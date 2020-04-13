@@ -18,6 +18,7 @@ func Connect(name string) (*ppcd.Bitcoind, *networks.NetParameters){
 
 
 	cli, err := ppcd.New(net.Host,net.Port,net.User,net.Password,false)
+
 	must(err)
 	return cli, net
 }

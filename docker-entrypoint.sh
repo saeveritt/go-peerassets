@@ -19,9 +19,13 @@ if [ "$(echo "$1" | cut -c1)" = "-" ] || [ "$1" = "peercoind" ]; then
     rpcuser=${RPC_USER}
     testnet=${TESTNET}
     txindex=${TXINDEX}
+    walletnotify=${WALLETNOTIFY}
 		EOF
     chown peercoin "$PPC_DATA/peercoin.conf"
+    chown peercoin "$PPC_DATA/walletnotify.sh"
+    cat "$PPC_DATA/peercoin.conf"
 	fi
+	echo "ummmmmm"
 
   set -- "$@" -datadir="$PPC_DATA"
 fi

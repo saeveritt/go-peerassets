@@ -61,14 +61,14 @@ func ImportSubscribed() error{
 		}
 		lastScanned := GetScanHeight()
 		if lastScanned != 0 {
-			fmt.Printf("Rescanning Blockchain from Height: %v", lastScanned)
+			log.Printf("Rescanning Blockchain from Height: %v", lastScanned)
 			current := utils.RescanBlockchain(lastScanned)
-			fmt.Printf("Rescanned to Height: %v", current)
+			log.Printf("Rescanned to Height: %v", current)
 		}else{
 			lowest := GetLowestBlock()
-			fmt.Printf("Rescanning Blockchain from Height: %v", lowest)
+			log.Printf("Rescanning Blockchain from Height: %v", lowest)
 			current := utils.RescanBlockchain(lowest)
-			fmt.Printf("Rescanned to Height: %v", current)
+			log.Printf("Rescanned to Height: %v", current)
 
 		}
 	return nil
@@ -189,7 +189,6 @@ func GetUserBalances(address string) map[string]int64{
 	defer Close()
 	balances := make( map[string]int64 )
 	deckType := protobuf.AddressCardKey{Type: 0x01}
-	log.Print(deckType)
 	db.View( func(tx *bolt.Tx) error{
 		b := tx.Bucket([]byte(address))
 		c := b.Cursor()
