@@ -8,9 +8,6 @@ services:
     environment:
       - RPC_USER=peercoind
       - RPC_PASSWORD=peercoindrpc
-      - TESTNET=1
-      - TXINDEX=1
-      - WALLETNOTIFY=/usr/local/bin/walletnotify.sh %s
     volumes:
       - /opt/go-peerassets/peercoin/:/data
     command:
