@@ -11,7 +11,7 @@ import (
 )
 
 func init(){
-	for Load(){time.Sleep( 3 * time.Second)}
+	for !Load(){time.Sleep( 3 * time.Second)}
 }
 
 func main() {
@@ -32,18 +32,19 @@ func Load() (start bool){
 	cli, _ := rpc.Connect("Peercoin-Testnet")
 	info, _ := cli.GetInfo()
 	if info.Blocks == info.Headers && info.Headers != 0 {
+		log.Printf("%v of %v Blocks", info.Blocks, info.Headers)
 		utils.ImportRootP2TH()
 		storage.PutRootAsset()
 		storage.ImportSubscribed()
 		storage.ImportSubscribedCards()
-		return false
+		return true
 	}
 	if info.Headers == 0{
 		log.Print("Connecting to local RPC node...")
 	}else {
 		log.Printf("%v of %v Blocks", info.Blocks, info.Headers)
 	}
-	return true
+	return false
 }
 
 

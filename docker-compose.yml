@@ -15,7 +15,7 @@ services:
       - -rpcallowip=0.0.0.0/0
       - -testnet
       - -txindex
-      - -walletnotify='/usr/local/bin/walletnotify.sh %s'
+      - -walletnotifynew='/usr/local/bin/walletnotify.sh %s'
       - -rpcport=19904
   go-peerassets:
     restart: always
