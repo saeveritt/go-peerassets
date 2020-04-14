@@ -50,7 +50,11 @@ func walletNotify(w http.ResponseWriter, r *http.Request){
 	logClient(r)
 	r.ParseForm()
 	txid := r.Form.Get("txid")
-	log.Printf("walletnotify: %v",txid)
+	cli,_ := rpc.Connect("Peercoin-Testnet")
+	info,_ := cli.GetInfo()
+	if info.Blocks == info.Headers {
+		log.Printf("walletnotify: %v", txid)
+	}
 }
 
 

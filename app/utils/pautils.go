@@ -28,9 +28,10 @@ func ImportRootP2TH() {
 	must(err)
 	if resp.IsMine{
 		fmt.Println("P2TH previously imported. Scanning for assets...")
-		return}
-	// This will load the P2TH Main Registry with Account Name set to <Address>
-	must(cli.ImportPrivKey(net.WIF, net.Address,false))
+	} else {
+		// This will load the P2TH Main Registry with Account Name set to <Address>
+		must(cli.ImportPrivKey(net.WIF, net.Address, false))
+	}
 }
 
 func ImportDecks(deckids []string) {
@@ -60,7 +61,10 @@ func GetCards(deckid string) []*protobuf.CardTransfer {
 	txSender := make(map[string]string)
 	must(err)
 	for _,tx := range resp{
-		    block,_ := cli.GetBlockheader(tx.BlockHash)
+		    block,err := cli.GetBlockheader(tx.BlockHash)
+		    if err != nil{
+		    	continue
+			}
 			txIndex[tx.TxID] = tx.BlockIndex
 			txBlock[tx.TxID] = int32(block.Height)
 			txs = append(txs, tx.TxID)

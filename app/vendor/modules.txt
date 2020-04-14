@@ -1,0 +1,19 @@
+# github.com/boltdb/bolt v1.3.1
+## explicit
+github.com/boltdb/bolt
+# github.com/golang/protobuf v1.3.5
+## explicit
+github.com/golang/protobuf/proto
+# github.com/gorilla/mux v1.7.4
+## explicit
+github.com/gorilla/mux
+# github.com/saeveritt/go-peercoind v0.0.0-20200413173755-2260ca730a6b
+## explicit
+github.com/saeveritt/go-peercoind
+# golang.org/x/sys v0.0.0-20200116001909-b77594299b42
+## explicit
+golang.org/x/sys/unix
+# golang.org/x/text v0.3.2
+## explicit
+# gopkg.in/yaml.v2 v2.2.8
+## explicit

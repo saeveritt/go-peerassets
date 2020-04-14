@@ -7,12 +7,9 @@ import (
 	"github.com/boltdb/bolt"
 	"github.com/saeveritt/go-peerassets/app/protobuf"
 	"github.com/saeveritt/go-peerassets/app/utils"
+	"log"
 	"os"
 	"time"
-
-	//"github.com/saeveritt/go-peerassets/utils"
-	"log"
-	//"time"
 )
 
 var db *bolt.DB
@@ -33,7 +30,7 @@ func Connect(){
 	if !open {
 		path, _ := os.Getwd()
 		conf := &bolt.Options{Timeout: 1 * time.Second}
-		db, err = bolt.Open(path + "/storage/assets.db", 0600, conf)
+		db, err = bolt.Open(path + "/storage/tppc.db", 0600, conf)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -265,6 +262,7 @@ func GetLowestBlock() uint64{
 		})
 		return nil
 	})
+	if lowest == 18446744073709551615{ return 0}
 	return lowest
 }
 
