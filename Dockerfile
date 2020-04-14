@@ -7,9 +7,11 @@ ENV GOOS=linux  \
 
 COPY ./docker-entrypoint.sh  /usr/local/bin/docker-entrypoint.sh
 COPY ./app/config/walletnotify.sh /usr/local/bin/walletnotify.sh
+COPY ./app/config/blocknotify.sh /usr/local/bin/blocknotify.sh
 
 RUN chmod +x  /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x  /usr/local/bin/walletnotify.sh
+RUN chmod +x  /usr/local/bin/blocknotify.sh
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 
@@ -22,6 +24,5 @@ RUN go mod download
 RUN go build -o main .
 
 CMD ["/app/main"]
-ENV LISTEN_PORT 8089
-ENV LISTEN_PORT 9904
+
 EXPOSE 8089
