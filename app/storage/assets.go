@@ -2,6 +2,7 @@ package storage
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"github.com/boltdb/bolt"
 	"github.com/saeveritt/go-peerassets/app/config"
@@ -18,33 +19,12 @@ func PutRootAsset(){
 	rawtxs := utils.RawTransactions(txs)
 	i := 0 // Deck counter
 	for _, rawtx := range rawtxs{
-		height := utils.GetBlockHeight(rawtx.Txid)
-		sender := utils.GetSender(rawtx)
-		receiver := utils.GetReceiver(rawtx)
-		opReturn := utils.GetMetaData(rawtx)
-		deck,err := utils.DeckParse(opReturn)
-		if err != nil{
-			continue
-		}
-		err = utils.ValidateDeckBasic(receiver, deck)
-		if err != nil {
-			continue
-		}
-		proto, err := deck.XXX_Marshal(nil, false)
-		if err != nil{
-			continue
-		}
-		if sender != "coinbase/coinstake"{
-			PutDeck(sender, rawtx)
-			PutDeckProto(proto, rawtx)
-			PutDeckCreator(sender, rawtx, proto)
-			PutDeckHeight(height, rawtx)
+			err := ImportDeck(rawtx.Txid)
+			if err != nil{ continue }
 			i++
 			fmt.Printf("\r%d Decks Validated", i)
 		}
-	}
 }
-
 
 func ImportSubscribed() error{
 	data, err := config.Open()
@@ -109,6 +89,31 @@ func GetScanHeight() uint64{
 	return utils.ByteUint64(scanHeight)
 }
 
+func ImportDeck(txid string) error{
+	rawtx := utils.RawTransactions([]string{txid})[0]
+	sender := utils.GetSender(rawtx)
+	if sender != "coinbase/coinstake" {
+		height := utils.GetBlockHeight(rawtx.Txid)
+		receiver := utils.GetReceiver(rawtx)
+		opReturn := utils.GetMetaData(rawtx)
+		deck, err := utils.DeckParse(opReturn)
+
+		if err != nil {
+			return err
+		}
+		err = utils.ValidateDeckBasic(receiver, deck)
+		if err != nil{return err}
+		proto, err := deck.XXX_Marshal(nil, false)
+		if err != nil {
+			return err
+		}
+		PutDeck(sender, rawtx)
+		PutDeckProto(proto, rawtx)
+		PutDeckCreator(sender, rawtx, proto)
+		PutDeckHeight(height, rawtx)
+	}else{ return errors.New("Coinbase Transaction")}
+	return nil
+}
 
 func PutDeck(sender string, rawtx ppcd.RawTransaction){
 	//Import deck information into local db
