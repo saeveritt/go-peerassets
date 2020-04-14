@@ -11,7 +11,7 @@ import (
 )
 
 func init(){
-	for Load(){time.Sleep( 2 * time.Second)}
+	for Load(){time.Sleep( 3 * time.Second)}
 }
 
 func main() {
