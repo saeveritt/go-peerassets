@@ -165,7 +165,7 @@ func GetAddress(address string, txType string, limit int, page int)([]byte,error
 						res = append(res,j)
 					case "deck":
 						d := protobuf.ParseDeck(v)
-						j := FormatDeckResponse(string(k[5:]), d)
+						j := FormatDeckResponse(string(k[4:]), d)
 						res = append(res, j)
 					}
 				}
